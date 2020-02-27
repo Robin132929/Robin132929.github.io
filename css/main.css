@@ -79,10 +79,10 @@ body a:hover {
   color: white;
 }
 .top-nav-collapse {
-  background-color: #84A5B1;
+  background-color: #000000;
 }
 .navbar-col-show {
-  background-color: #84A5B1;
+  background-color: #000000;
 }
 @media (max-width: 768px) {
   .navbar {
