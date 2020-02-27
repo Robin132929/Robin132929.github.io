@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="author" content="robin">
+  
+    <meta name="description" content="Context相关知识以及源码解析">
+  
+  
+    <meta name="keywords" content="Basics,Context," />
+  
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <title>Context知识详解 ~ Robin</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.10.2/css/all.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.8.9/css/mdb.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css"  >
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+  <link rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css"  >
+
+
+  <link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"  >
+
+<link rel="stylesheet" href="/css/main.css"  >
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+  <style type="text/css">
+    .banner-bg {
+      
+        background-image: url('/img/default.png');
+      
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  </style>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="banner-bg">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Robin</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">主页</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/reading/">读书</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/photo/">相册</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">归档</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">标签</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+</nav>
+
+    <div class="view intro-2 rgba-black-slight" id="background">
+      <div class="full-bg-img">
+        <div class="mask flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+            
+              <br>
+              <p class="mt-3">
+                <i class="far fa-calendar-alt"></i>
+                <span class="post-date">2019-10-22&nbsp;|&nbsp;</span>
+                <i class="far fa-chart-bar"></i>
+                <span class="post-count">3.1k</span>字&nbsp;|&nbsp;
+                <i class="far fa-clock"></i>
+                <span class="post-count">14</span>分钟
+                
+                  <span id="busuanzi_container_page_pv" style="display:none">
+                    &nbsp;|&nbsp;
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv"></span>次
+                  </span>
+                
+              </p>
+            
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="rgba-black-slight">
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto" id="post">
+          <div class="markdown-body">
+            <p>Context相关知识以及源码解析</p>
+<a id="more"></a>
+
+<h1 id="Context知识详解"><a href="#Context知识详解" class="headerlink" title="Context知识详解"></a>Context知识详解</h1><p>建议配合context知识架构图食用。</p>
+<h2 id="一、什么是Context"><a href="#一、什么是Context" class="headerlink" title="一、什么是Context"></a>一、什么是Context</h2><p>贴一个官方解释：</p>
+<blockquote>
+<p>Interface to global information about an application environment. This is an abstract class whose implementation is provided by the Android system. It allows access to application-specific resources and classes, as well as up-calls for application-level operations such as launching activities, broadcasting and receiving intents, etc.</p>
+</blockquote>
+<p>  上面的意思：context是一个应用程序环境的全局信息的接口。这是一个抽象类，其实现由Android系统提供。它允许访问特定于应用程序的资源和类，以及对应用程序级操作（如启动活动，广播和接收意图等）的调用。</p>
+<p>这个解释可能听起来比较抽象，我的理解是一些Android组件（如activity、service）的运行需要一定的“环境”，就好像我们工作一般都是在办公室 ，休息则是在家里，我们都是处在一定的“环境”下去工作、学习、休息的，Android组件也是类似，它们不能脱离“环境”去运转，而这个“环境”在Android中就是context。</p>
+<h2 id="二、Context子类以及其继承关系"><a href="#二、Context子类以及其继承关系" class="headerlink" title="二、Context子类以及其继承关系"></a>二、Context子类以及其继承关系</h2><p>先贴个图<br><img src="https://img2018.cnblogs.com/blog/1902145/201912/1902145-20191218185657055-2012607942.jpg" srcset="/img/loading.gif" alt="context"></p>
+<p>由图我们可以看出context有两个子类ContextImpl和ContextWrapper。</p>
+<h3 id="ContextWrapper"><a href="#ContextWrapper" class="headerlink" title="ContextWrapper"></a>ContextWrapper</h3><p>我们先来看下ContextWrapper。</p>
+<pre><code>*/***
+* * Proxying implementation of Context that simply delegates all of its calls to*
+* * another Context.  Can be subclassed to modify behavior without changing*
+* * the original Context.*
+* */*
+public class ContextWrapper extends Context {
+    Context mBase;
+
+    public ContextWrapper(Context base) {
+        mBase = base;
+    }
+
+    */***
+*     * Set the base context for this ContextWrapper.  All calls will then be*
+*     * delegated to the base context.  Throws*
+*     * IllegalStateException if a base context has already been set.*
+*     * *
+*     ****@param***base The new base context for this wrapper.*
+*     */*
+protected void attachBaseContext(Context base) {
+        if (mBase != null) {
+            throw new IllegalStateException(“Base context already set”);
+        }
+        mBase = base;
+    }
+
+    */***
+*     ****@return***the base context as set by the constructor or setBaseContext*
+*     */*
+public Context getBaseContext() {
+        return mBase;
+    }
+
+    @Override
+    public AssetManager getAssets() {
+        return mBase.getAssets();
+    }
+
+    @Override
+    public Resources getResources() {
+        return mBase.getResources();
+    }
+
+    @Override
+    public PackageManager getPackageManager() {
+        return mBase.getPackageManager();
+    }
+
+    @Override
+    public ContentResolver getContentResolver() {
+        return mBase.getContentResolver();
+    }
+
+    @Override
+    public Looper getMainLooper() {
+        return mBase.getMainLooper();
+    }
+
+    @Override
+    public Context getApplicationContext() {
+        return mBase.getApplicationContext();
+    }
+
+    @Override
+    public void setTheme(int resid) {
+        mBase.setTheme(resid);
+    }
+
+    */*****@hide****/*
+@Override
+    public int getThemeResId() {
+        return mBase.getThemeResId();
+    }
+
+    @Override
+    public Resources.Theme getTheme() {
+        return mBase.getTheme();
+    }
+    @Override
+    public void startActivity(Intent intent) {
+        mBase.startActivity(intent);
+    }
+    @Override
+    public void sendBroadcast(Intent intent) {
+        mBase.sendBroadcast(intent);
+    }
+//...
+}</code></pre><p>该类直接继承自Context，并实现了Context定义的抽象方法。不过我们看源码发现其实它并未实质的去实现Context定义的操作只是通过mBase调用对应的方法去执行。这个mBase也是一个Context类型的变量，它的赋值是通过attachBaseContext赋值的。我们还知道service和application都是ContextWrapper子类，所以service和application都是Context。</p>
+<pre><code>public abstract class Service extends ContextWrapper implements ComponentCallbacks2 {
+    //...
+}
+
+public class Application extends ContextWrapper implements ComponentCallbacks2 {
+    //...
+}</code></pre><p>ContextWrapper还有一个子类ContextThemeWrapper。</p>
+<pre><code>public class ContextThemeWrapper extends ContextWrapper {
+    private int mThemeResource;
+    private Resources.Theme mTheme;
+    private LayoutInflater mInflater;
+
+    public ContextThemeWrapper(Context base, @StyleRes int themeResId) {
+        super(base);
+        mThemeResource = themeResId;
+    }
+
+    public ContextThemeWrapper(Context base, Resources.Theme theme) {
+        super(base);
+        mTheme = theme;
+    }
+
+    @Override
+    public Resources getResources() {
+        return getResourcesInternal();
+    }
+
+    private Resources getResourcesInternal() {
+        if (mResources == null) {
+            if (mOverrideConfiguration == null) {
+                mResources = super.getResources();
+            } else if (Build.VERSION.SDK_INT &gt;= 17) {
+                final Context resContext = createConfigurationContext(mOverrideConfiguration);
+                mResources = resContext.getResources();
+            }
+        }
+        return mResources;
+    }
+
+    @Override
+    public void setTheme(int resid) {
+        if (mThemeResource != resid) {
+            mThemeResource = resid;
+            initializeTheme();
+        }
+    }
+
+    public int getThemeResId() {
+        return mThemeResource;
+    }
+
+    @Override
+    public Resources.Theme getTheme() {
+        if (mTheme != null) {
+            return mTheme;
+        }
+
+        if (mThemeResource == 0) {
+            mThemeResource = R.style.Theme_AppCompat_Light;
+        }
+        initializeTheme();
+
+        return mTheme;
+    }
+
+    private void initializeTheme() {
+        final boolean first = mTheme == null;
+        if (first) {
+            mTheme = getResources().newTheme();
+            Resources.Theme theme = getBaseContext().getTheme();
+            if (theme != null) {
+                mTheme.setTo(theme);
+            }
+        }
+        onApplyThemeResource(mTheme, mThemeResource, first);
+    }
+//...
+}</code></pre><p>可以看出ContextThemeWrapper主要是包含了主题Theme相关的接口，即android:theme属性指定的。而activity则是继承自ContextThemeWrapper。</p>
+<pre><code>public class Activity extends ContextThemeWrapper
+        implements LayoutInflater.Factory2,
+        Window.Callback, KeyEvent.Callback,
+        OnCreateContextMenuListener, ComponentCallbacks2,
+        Window.OnWindowDismissedCallback {
+    //...
+}</code></pre><h3 id="ContextImpl"><a href="#ContextImpl" class="headerlink" title="ContextImpl"></a>ContextImpl</h3><p>由ContextWrapper源码我们知道实际上它并没有实现Context定义的相关操作。那么Context的真实实现类到底是谁呢 答案就是ContextImpl。它是Android系统提供的唯一的Context真实 实现类。</p>
+<pre><code>class ContextImpl extends Context {
+
+    @Override
+    public void startActivity(Intent intent) {
+        warnIfCallingFromSystemProcess();
+        startActivity(intent, null);
+    }
+
+    @Override
+    public void sendBroadcast(Intent intent) {
+        warnIfCallingFromSystemProcess();
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.prepareToLeaveProcess(this);
+            ActivityManager.getService().broadcastIntent(
+                    mMainThread.getApplicationThread(), intent, resolvedType, null,
+                    Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, false,
+                    getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        return registerReceiver(receiver, filter, null, null);
+    }
+
+    @Override
+    public ComponentName startService(Intent service) {
+        warnIfCallingFromSystemProcess();
+        return startServiceCommon(service, false, mUser);
+    }
+
+    //...
+
+}</code></pre><p>由源码看出ContextImpl确是是真实的实现了Context。</p>
+<h2 id="三、一个应用Context个数"><a href="#三、一个应用Context个数" class="headerlink" title="三、一个应用Context个数"></a>三、一个应用Context个数</h2><p>通过上面Context子类继承关系的分析，一个应用Context个数显而易见。<br>APP Context总数 = Application(1) + Activity个数+ Service个数;</p>
+<h2 id="四、不同的Context之间差异"><a href="#四、不同的Context之间差异" class="headerlink" title="四、不同的Context之间差异"></a>四、不同的Context之间差异</h2><p>我们知道Application的生命周期跟应用的生命周期是相同的，所以Application的Context生命周期与应用程序完全相同。同理<br>Activity或者Service的Context与他们各自类生命周期相同。</p>
+<p>由此可知Context使用不当会引起内存泄漏，我们在使用Context时必须要注意其生命周期。</p>
+<ul>
+<li><p>尽量使用 Application 的 Context</p>
+</li>
+<li><p>不要让生命周期长于 Activity 的对象持有其的引用</p>
+</li>
+<li><p>尽量不要在 Activity 中使用非静态内部类，因为非静态内部类会隐式持有外部类示例的引用，如果使用静态内部类，将外部实例引用作为弱引用持有。</p>
+</li>
+</ul>
+<h2 id="五、不同Context的应用场景"><a href="#五、不同Context的应用场景" class="headerlink" title="五、不同Context的应用场景"></a>五、不同Context的应用场景</h2><p><img src="https://img-blog.csdn.net/20150104183450879" srcset="/img/loading.gif" alt="Context应用场景"></p>
+<blockquote>
+<p>大家注意看到有一些NO上添加了一些数字，其实这些从能力上来说是YES，但是为什么说是NO呢？下面一个一个解释：<br>数字1：启动Activity在这些类中是可以的，但是需要创建一个新的task。一般情况不推荐。<br>数字2：在这些类中去layout inflate是合法的，但是会使用系统默认的主题样式，如果你自定义了某些样式可能不会被使用。<br>数字3：在receiver为null时允许，在4.2或以上的版本中，用于获取黏性广播的当前值。（可以无视）<br>注：ContentProvider、BroadcastReceiver之所以在上述表格中，是因为在其内部方法中都有一个context用于使用。</p>
+</blockquote>
+<p>以上参考<a href="https://blog.csdn.net/lmj623565791/article/details/40481055" target="_blank" rel="noopener">https://blog.csdn.net/lmj623565791/article/details/40481055</a></p>
+<p>由表格我们可以归纳出这样一个结论：操作涉及UI的应该使用Activity做为Context，不涉及UI的Service,Activity,Application等实例都可以。</p>
+<h2 id="六、不同Context实例化过程"><a href="#六、不同Context实例化过程" class="headerlink" title="六、不同Context实例化过程"></a>六、不同Context实例化过程</h2><h3 id="Activity-中Context实例化过程"><a href="#Activity-中Context实例化过程" class="headerlink" title="Activity 中Context实例化过程"></a>Activity 中Context实例化过程</h3><p>在Activity的启动过程中，activity的创建是在ActivityThread.<br>performLaunchActivity方法中完成的。</p>
+<pre><code>//ActivityThread.java
+private Activity performLaunchActivity(ActivityClientRecord r,Intent customIntent){
+        //...
+        ContextImpl appContext=createBaseContextForActivity(r);//1、创建ContextImpl实例
+        Activity activity=null;
+        try{
+        java.lang.ClassLoader cl=appContext.getClassLoader();
+        //...
+        activity=mInstrumentation.newActivity(
+        cl,component.getClassName(),r.intent);//2、创建Activity
+        StrictMode.incrementExpectedActivityCount(activity.getClass());
+        r.intent.setExtrasClassLoader(cl);
+        r.intent.prepareToEnterProcess();
+        if(r.state!=null){
+        r.state.setClassLoader(cl);
+        }
+        }catch(Exception e){
+        if(!mInstrumentation.onException(activity,e)){
+        throw new RuntimeException(
+        &quot;Unable to instantiate activity &quot;+component
+        +&quot;: &quot;+e.toString(),e);
+        }
+        }
+
+        try{
+        Application app=r.packageInfo.makeApplication(false,mInstrumentation);
+        if(activity!=null){
+        appContext.setOuterContext(activity);//3、调用setOuterContext
+        activity.attach(appContext,this,getInstrumentation(),r.token,
+        r.ident,app,r.intent,r.activityInfo,title,r.parent,
+        r.embeddedID,r.lastNonConfigurationInstances,config,
+        r.referrer,r.voiceInteractor,window,r.configCallback);//4、调用attach
+        }
+       //...
+    }</code></pre><p>首先通过createBaseContextForActivity创建ContextImpl实例，那我们看下具体是如何创建的</p>
+<pre><code>private ContextImpl createBaseContextForActivity(ActivityClientRecord r) {
+    final int displayId;
+    try {
+        displayId = ActivityManager.getService().getActivityDisplayId(r.token);
+    } catch (RemoteException e) {
+        throw e.rethrowFromSystemServer();
+    }
+
+    ContextImpl appContext = ContextImpl.createActivityContext(
+            this, r.packageInfo, r.activityInfo, r.token, displayId, r.overrideConfig);
+//...
+    return appContext;
+}
+</code></pre><p>可以看出是调用createActivityContext，那来看下createActivityContext</p>
+<pre><code>static ContextImpl createActivityContext(ActivityThread mainThread,
+        LoadedApk packageInfo, ActivityInfo activityInfo, IBinder activityToken, int displayId,
+        Configuration overrideConfiguration) {
+//...
+ContextImpl context = new ContextImpl(null, mainThread, packageInfo, activityInfo.splitName,
+        activityToken, null, 0, classLoader);
+
+//...
+context.setResources(resourcesManager.createBaseActivityResources(activityToken,
+        packageInfo.getResDir(),
+        splitDirs,
+        packageInfo.getOverlayDirs(),
+        packageInfo.getApplicationInfo().sharedLibraryFiles,
+        displayId,
+        overrideConfiguration,
+        compatInfo,
+        classLoader));
+context.mDisplay = resourcesManager.getAdjustedDisplay(displayId,
+        context.getResources());
+return context;
+}</code></pre><p>可以看到是调用了ContextImpl得一个构造函数创建的ContextImpl实例然后还给该实例设置了setResources，至此ContextImpl创建完成。但是我们注意到在创建了ContextImpl实例（appContext）之后又调用了setOuterContext<br>并把当前activity传入，这又是为什么呢？ 看下源码</p>
+<pre><code>private Context mOuterContext;
+
+final void setOuterContext(Context context) {
+    mOuterContext = context;
+}</code></pre><p>setOuterContext只是简单的把传入的activity赋值给了mOuterContext，这是ContextImpl类中定义的一个变量。通过这个操作ContextImpl就可以持有activity的引用。<br>setOuterContext之后又调用了activity.attach并把appContext传入。</p>
+<pre><code>final void attach(Context context, ActivityThread aThread,
+        Instrumentation instr, IBinder token, int ident,
+        Application application, Intent intent, ActivityInfo info,
+        CharSequence title, Activity parent, String id,
+        NonConfigurationInstances lastNonConfigurationInstances,
+        Configuration config, String referrer, IVoiceInteractor voiceInteractor,
+        Window window, ActivityConfigCallback activityConfigCallback) {
+    attachBaseContext(context);
+//...
+}</code></pre><pre><code>//Activity.java
+protected void attachBaseContext(Context newBase) {
+    super.attachBaseContext(newBase);
+    newBase.setAutofillClient(this);
+}
+</code></pre><p>Activity的attach我们只关注跟context有关的 那就是调用attachBaseContext，在这个函数内部调用了super.attachBaseContext。我们知道Activity继承自 ContextThemeWrapper， ContextThemeWrapper<br>继承自 ContextWrapper，所以最终会调用ContextWrapper.attachBaseContext，到这里，ContextWrapper类就可以将它的功能交给ContextImpl类来具体实现。</p>
+<pre><code>//ContextWrapper.java
+protected void attachBaseContext(Context base) {
+    if (mBase != null) {
+        throw new IllegalStateException(&quot;Base context already set&quot;);
+    }
+    mBase = base;
+}</code></pre><h3 id="Service中Context实例化过程"><a href="#Service中Context实例化过程" class="headerlink" title="Service中Context实例化过程"></a>Service中Context实例化过程</h3><pre><code>private void handleCreateService(CreateServiceData data){
+        //...
+        Service service=null;
+        try{
+        java.lang.ClassLoader cl=packageInfo.getClassLoader();
+        service=(Service)cl.loadClass(data.info.name).newInstance();//1、创建service
+        }catch(Exception e){
+        if(!mInstrumentation.onException(service,e)){
+        throw new RuntimeException(
+        &quot;Unable to instantiate service &quot;+data.info.name
+        +&quot;: &quot;+e.toString(),e);
+        }
+        }
+        try{
+        if(localLOGV)Slog.v(TAG,&quot;Creating service &quot;+data.info.name);
+
+        ContextImpl context=ContextImpl.createAppContext(this,packageInfo);//2、创建ContextImpl实例
+        context.setOuterContext(service);//3、设置OuterContext
+
+        Application app=packageInfo.makeApplication(false,mInstrumentation);
+        service.attach(context,this,data.info.name,data.token,app,
+        ActivityManager.getService()); //4、调用attach
+        service.onCreate();
+        mServices.put(data.token,service);
+        try{
+        ActivityManager.getService().serviceDoneExecuting(
+        data.token,SERVICE_DONE_EXECUTING_ANON,0,0);
+        }catch(RemoteException e){
+        throw e.rethrowFromSystemServer();
+        }
+        }catch(Exception e){
+        if(!mInstrumentation.onException(service,e)){
+        throw new RuntimeException(
+        &quot;Unable to create service &quot;+data.info.name
+        +&quot;: &quot;+e.toString(),e);
+        }
+        }
+     }</code></pre><p>我们看到Service中Context实例的创建流程跟Activity基本是一样的，首先创建Service实例然后创建ContextImpl实例，之后调用setOuterContext最后是attach。<br>Service中ContextImpl实例是通过函数createAppContext创建的，其内部则是通过ContextImpl的构造函数来创建实例。</p>
+<pre><code>static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo) {
+    if (packageInfo == null) throw new IllegalArgumentException(&quot;packageInfo&quot;);
+    ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, 0,
+            null);
+    context.setResources(packageInfo.getResources());
+    return context;
+}</code></pre><p>setOuterContext操作跟Activity是一样的都是把引用赋值给mOuterContext。<br>最后就是attch了，下面是service的attach，可以看到它也是调用attachBaseContext，下面的流程跟Activity是一样的最终都是ContextWrapper类将它的功能交给ContextImpl类来具体实现。</p>
+<pre><code>public final void attach(
+        Context context,
+        ActivityThread thread, String className, IBinder token,
+        Application application, Object activityManager) {
+    attachBaseContext(context);//调用attachBaseContext
+    mThread = thread;           // NOTE:  unused - remove?
+    mClassName = className;
+    mToken = token;
+    mApplication = application;
+    mActivityManager = (IActivityManager)activityManager;
+    mStartCompatibility = getApplicationInfo().targetSdkVersion
+            &lt; Build.VERSION_CODES.ECLAIR;
+}</code></pre><h3 id="Application中的Context的实例化过程"><a href="#Application中的Context的实例化过程" class="headerlink" title="Application中的Context的实例化过程"></a>Application中的Context的实例化过程</h3><p>Application 的创建是在LoadedApk.makeApplication中。</p>
+<pre><code>//LoadedApk.Java
+public Application makeApplication(boolean forceDefaultAppClass,
+        Instrumentation instrumentation) {
+    if (mApplication != null) {
+        return mApplication;
+    }
+//...
+Application app = null;
+
+try {
+            java.lang.ClassLoader cl = getClassLoader();
+            if (!mPackageName.equals(&quot;android&quot;)) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        &quot;initializeJavaContextClassLoader&quot;);
+                initializeJavaContextClassLoader();
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            }
+            ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);//1、创建ContextImpl实例
+            app = mActivityThread.mInstrumentation.newApplication(
+                    cl, appClass, appContext);//2、创建application
+            appContext.setOuterContext(app);//3、设置mOuterContext
+        } catch (Exception e) {
+            if (!mActivityThread.mInstrumentation.onException(app, e)) {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                throw new RuntimeException(
+                    &quot;Unable to instantiate application &quot; + appClass
+                    + &quot;: &quot; + e.toString(), e);
+            }
+        }
+        mActivityThread.mAllApplications.add(app);
+        mApplication = app;
+//...
+}</code></pre><p>可以看到Application中是先创建了ContextImpl实例然后创建Application实例最后调用了setOuterContext。看上去跟Service和Activity相比缺少了attach，而我们知道attach是ContextWrapper类将它的功能交给ContextImpl类来具体实现的过程，Application缺少attach那它是如何实现ContextWrapper的代理过程的呢？ 其实Application是有attach的 它在newApplication创建Application的过程中调用的。</p>
+<pre><code>public Application newApplication(ClassLoader cl, String className, Context context)
+        throws InstantiationException, IllegalAccessException, 
+        ClassNotFoundException {
+    return newApplication(cl.loadClass(className), context);
+}
+
+ static public Application newApplication(Class&lt;?&gt; clazz, Context context)
+            throws InstantiationException, IllegalAccessException, 
+            ClassNotFoundException {
+        Application app = (Application)clazz.newInstance();
+
+        app.attach(context);//调用application的attach方法
+        return app;
+    }
+
+final void attach(Context context) {
+    attachBaseContext(context);  //调用attachBaseContext
+    mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
+}
+</code></pre><p>嗯，这样看application和Service还有Activity的流程基本上是一致的。</p>
+<p>至此Application、Service、Activity中context的实例化过程都已分析完了。</p>
+<h2 id="七、其他"><a href="#七、其他" class="headerlink" title="七、其他"></a>七、其他</h2><h3 id="无侵入式获取全局Context"><a href="#无侵入式获取全局Context" class="headerlink" title="无侵入式获取全局Context"></a>无侵入式获取全局Context</h3><p>使用一个ContentProvider，ContentProvider的onCreate()方法调用时，调用getContext()即可获取到Context，再静态变量保存，后续直接获取即可。</p>
+<pre><code>public class AppContextProvider extends ContentProvider {
+    static Context mContext;
+    @Override
+    public boolean onCreate() {
+        //mContext保存为静态变量
+        mContext = getContext();
+        return false;
+    }
+
+    //...
+}
+
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        package=&quot;com.app.contextprovider&quot;&gt;
+
+    &lt;application&gt;
+        &lt;!-- 全局Context提供者 --&gt;
+        &lt;provider
+                android:name=&quot;.AppContextProvider&quot;
+                android:authorities=&quot;${applicationId}.contextprovider&quot;
+                android:exported=&quot;false&quot; /&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre><h3 id="getApplication和getApplicationContext的区别"><a href="#getApplication和getApplicationContext的区别" class="headerlink" title="getApplication和getApplicationContext的区别"></a>getApplication和getApplicationContext的区别</h3><p>首先来看getApplication方法,它只有在Activity和Service中有实现</p>
+<pre><code>Activity
+/** Return the application that owns this activity. */
+public final Application getApplication() {
+    return mApplication;
+}
+
+Service
+/** Return the application that owns this service. */
+public final Application getApplication() {
+    return mApplication;
+}</code></pre><p>Activity和Service中getApplication返回的是一个application对象。</p>
+<p>getApplicationContext是ContextWrapper提供的方法，由源码可知它调用的是mBase的getApplicationContext()。此处的mBase实际是一个ContextImpl，所以我们看下ContextImpl的getApplicationContext()，可以看到返回的是mPackageInfo.getApplication()（此处的mPackageInfo包含当前应用的包信息、比如包名、应用的安装目录等信息，一般不为空）。</p>
+<pre><code>//ContextWrapper
+public Context getApplicationContext() {
+    return mBase.getApplicationContext();
+}
+
+//ContextImpl
+public Context getApplicationContext() {
+    return (mPackageInfo != null) ?
+            mPackageInfo.getApplication() : mMainThread.getApplication();
+}
+</code></pre><p>我们知道一个应用只有一个Application所以getApplication和getApplicationContext 实际上都是返回当前应用的Application，它们是同一个对象。这两个函数的区别就是getApplication只能在Activity和Service中调用，而getApplicationContext 的使用范围则要大一些，比如在广播中想要获取全局的Context则需要使用getApplicationContext 而不是getApplication。</p>
+<p><strong>以上就是Context相关知识点的整理解析。</strong></p>
+<blockquote>
+<p>本文所有源码基于Android-8.0.0_r1</p>
+</blockquote>
+
+            <hr>
+          </div>
+          <br>
+          <div>
+            <div id="post-tag">
+              
+              <span>
+                <i class="iconfont icon-tag"></i>
+                
+                  <a class="hover-with-bg" href="/tags/Basics">Basics</a>
+                
+                  <a class="hover-with-bg" href="/tags/Context">Context</a>
+                
+              </span>
+            </div>
+            
+              <div id="post-note">
+                <div><strong>本文作者：</strong><a href="/">myname</a></div>
+                <div><strong>本文链接：</strong><a href="http://yoursite.com/2019/10/22/%20ContextDK/">http://yoursite.com/2019/10/22/%20ContextDK/</a></div>
+                <div><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</div>
+              </div>
+            
+            
+              <div id="post-nav" class="container">
+                  <div class="row">
+                    
+                      <a href="/2019/11/01/IntentDK/" id="post-nav-prev" class="col">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="post-nav-title">Intent知识详解</span>
+                      </a>
+                    
+                    
+                      <a href="/2019/10/21/Context/" id="post-nav-next" class="col">
+                        <span class="post-nav-title">Context知识架构图</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+            
+          </div>
+        </div>
+
+        <!-- custom -->
+        
+
+        <!-- Comments -->
+        <div class="col-lg-10 mx-auto nopadding-md">
+          <div class="container comments mx-auto" id="comments">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;ディレクトリ</p>
+    <div id="tocbot"></div>
+  </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+  </main>
+  
+<div id="sidebar" class="sidebar-hide">
+  <span class="sidebar-button sidebar-button-shift" id="toggle-sidebar" >
+    <i class="fa fa-arrow-right on" aria-hidden="true"></i>
+  </span>
+  <div class="sidebar-overlay"></div>
+  <div class="sidebar-intrude">
+    <div class="sidebar-avatar">
+      <img src="/img/favicon.png" srcset="/img/favicon.png" alt="avatar"/>
+    </div>
+    <div class="text-center sidebar-about">
+      <p class="h3 sidebar-author">Robin</p>
+      <p class="sidebar-subtitle"></p>
+      
+        <a href="https://github.com" class="h4" target="_blank">
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="https://twitter.com" class="h4" target="_blank">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="mailto:example@example.com" class="h4" target="_blank">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+    </div>
+    <div class="sidebar-friend">
+      <p class="h6 sidebar-friend-title">
+        <span class="sidebar-label-left"><i class="fas fa-user-friends"></i></span>
+        <span class="sidebar-label">友情链接</span>
+      </p>
+      <ul class="list-group">
+        
+          <a href="https://example.com/" target="_blank">
+            <li class="list-group-item">
+              <i class="fas fa-quote-left"></i>&nbsp;
+              friendname
+            </li>
+          </a>
+        
+    </ul>
+    </div>
+  </div>
+</div>
+
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">検索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">キーワード</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <div id="footerContent"  class="rgba-black-slight">
+<footer class="pt-5">
+  <div class="text-center py-3">
+  
+
+    
+      <div class="footer-copyright">
+        
+          ©2020&nbsp;robin
+        
+        
+          
+            <i class="iconfont icon-love"></i>
+          
+          <span>运转了<span id="runtime"></span>天</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+    
+  </div>
+</footer>
+</div>
+<!-- SCRIPTS -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js" ></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
+<script src="https://cdn.staticfile.org/mdbootstrap/4.8.9/js/mdb.min.js" ></script>
+<script src="/js/main.js" ></script>
+
+  <script src="/js/lazyload.js" ></script>
+
+
+  
+    <script src="https://cdn.staticfile.org/tocbot/4.8.0/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
+<!-- Plugins -->
+
+  <script src="https://cdn.staticfile.org/prettify/r298/prettify.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/typed.js/2.0.10/typed.min.js" ></script>
+  <script type="text/javascript">
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Context知识详解&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/anchor-js/4.2.0/anchor.min.js" ></script>
+  <script type="text/javascript">
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+  <script src="/js/local-search.js" ></script>
+  <script type="text/javascript">
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script type="text/javascript">
+  /* Fancybox */
+  var setupFancybox = function () {
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(function() {
+    var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      $(this).wrap(element);
+    });
+  };
+  setupFancybox();
+  </script>
+
+
+
+
+  <!-- 首页文章列表随机图片 -->
+  <script type="text/javascript">
+    $("img.image_random").each(function(){
+      
+        var xjhUrl = "//img.xjh.me/random_img.php?return=json";
+      
+      var _this = $(this);
+      $.get(xjhUrl,function(data,status){
+        if(status === "success"){
+          if(data.result === 200){
+            _this[0].src = data.img;
+          }
+        }
+      });
+    });
+  </script>
+
+
+
+
+  <script async src="//cdn.jsdelivr.net/npm/busuanzi@2.3.0/bsz.pure.mini.js" ></script>
+  
+
+
+  
+  
+    <script type="text/javascript">
+      //定义获取词语下标
+      var a_idx = 0;
+      jQuery(document).ready(function ($) {
+        //点击body时触发事件
+        $("body").click(function (e) {
+          //需要显示的词语
+          var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+          //设置词语给span标签
+          var $i = $("<span/>").text(a[a_idx]);
+          //下标等于原来下标+1  余 词语总数
+          a_idx = (a_idx + 1) % a.length;
+          //获取鼠标指针的位置，分别相对于文档的左和右边缘。
+          //获取x和y的指针坐标
+          var x = e.pageX, y = e.pageY;
+          //在鼠标的指针的位置给$i定义的span标签添加css样式
+          $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": rand_color()
+          });
+          // 随机颜色
+          function rand_color() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+          }
+          //在body添加这个标签
+          $("body").append($i);
+          //animate() 方法执行 CSS 属性集的自定义动画。
+          //该方法通过CSS样式将元素从一个状态改变为另一个状态。CSS属性值是逐渐改变的，这样就可以创建动画效果。
+          //详情请看http://www.w3school.com.cn/jquery/effect_animate.asp
+          $i.animate({
+            //将原来的位置向上移动180
+            "top": y - 180,
+            "opacity": 0
+            //1500动画的速度
+          }, 1500, function () {
+            //时间到了自动删除
+            $i.remove();
+          });
+        });
+      })
+      ;
+    </script>
+  
+
+
+<!-- Functions -->
+<script type="text/javascript">
+  /* 切换背景 */
+  
+    $("body").removeClass("banner-bg");
+    $("#background").addClass("banner-bg");
+    $('#mainContent').removeClass("rgba-black-slight");
+    $('#footerContent').removeClass("rgba-black-slight");
+    if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) || (/Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent))) {
+      $("#background").css("background-attachment", "scroll");
+    }
+  
+</script>
+
+  <script type="text/javascript">
+    /*显示博客运行时间*/
+    var blogRunTime = function () {
+      var runTime = document.getElementById("runtime");
+      var runtimeDate = "2019,04,20";
+	    var createDate = new Date(runtimeDate);
+	    var nowDate = new Date();
+	    var dateLine = nowDate.getTime() - createDate.getTime();
+	    var runDate = Math.floor(dateLine / (1000 * 60 * 60 * 24));
+	    runTime.innerHTML = runDate;
+    };
+    $(document).ready(function(){
+	    blogRunTime();
+    });
+  </script>
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+  
+</body>
+</html>

@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="author" content="robin">
+  
+    <meta name="description" content="Okhttp解析系列">
+  
+  
+    <meta name="keywords" content="Okhttp," />
+  
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <title>Okhttp解析之--Interceptor详解 ~ Robin</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.10.2/css/all.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.8.9/css/mdb.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css"  >
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+  <link rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css"  >
+
+
+  <link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"  >
+
+<link rel="stylesheet" href="/css/main.css"  >
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+  <style type="text/css">
+    .banner-bg {
+      
+        background-image: url('/img/default.png');
+      
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  </style>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="banner-bg">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Robin</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">主页</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/reading/">读书</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/photo/">相册</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">归档</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">标签</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+</nav>
+
+    <div class="view intro-2 rgba-black-slight" id="background">
+      <div class="full-bg-img">
+        <div class="mask flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+            
+              <br>
+              <p class="mt-3">
+                <i class="far fa-calendar-alt"></i>
+                <span class="post-date">2019-11-17&nbsp;|&nbsp;</span>
+                <i class="far fa-chart-bar"></i>
+                <span class="post-count">4.7k</span>字&nbsp;|&nbsp;
+                <i class="far fa-clock"></i>
+                <span class="post-count">23</span>分钟
+                
+                  <span id="busuanzi_container_page_pv" style="display:none">
+                    &nbsp;|&nbsp;
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv"></span>次
+                  </span>
+                
+              </p>
+            
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="rgba-black-slight">
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto" id="post">
+          <div class="markdown-body">
+            <p>Okhttp解析系列</p>
+<a id="more"></a>
+
+<h1 id="Okhttp解析—Interceptor详解"><a href="#Okhttp解析—Interceptor详解" class="headerlink" title="Okhttp解析—Interceptor详解"></a>Okhttp解析—Interceptor详解</h1><p>Interceptor可以说是okhttp的精髓之一，Okhttp重写请求/响应、重试、缓存响应等操作，基本都是在各个Interceptor中完成的，上篇文章分析Okhttp运行流程时只是简单带过，那么这篇文章就来详细分析下Interceptor以及拦截器链机制。</p>
+<h2 id="一、Interceptor以及InterceptorChain"><a href="#一、Interceptor以及InterceptorChain" class="headerlink" title="一、Interceptor以及InterceptorChain"></a>一、Interceptor以及InterceptorChain</h2><pre><code>/**
+ * Observes, modifies, and potentially short-circuits requests going out and the corresponding
+ * responses coming back in. Typically interceptors add, remove, or transform headers on the request
+ * or response.
+ */
+public interface Interceptor {
+  Response intercept(Chain chain) throws IOException;
+
+  interface Chain {
+    Request request();
+
+    Response proceed(Request request) throws IOException;
+
+    /**
+     * Returns the connection the request will be executed on. This is only available in the chains
+     * of network interceptors; for application interceptors this is always null.
+     */
+    @Nullable Connection connection();
+
+    Call call();
+
+    int connectTimeoutMillis();
+
+    Chain withConnectTimeout(int timeout, TimeUnit unit);
+
+    int readTimeoutMillis();
+
+    Chain withReadTimeout(int timeout, TimeUnit unit);
+
+    int writeTimeoutMillis();
+
+    Chain withWriteTimeout(int timeout, TimeUnit unit);
+  }
+}
+</code></pre><p>Interceptor最主要的就是其intercept（）函数，InterceptorChain则是Interceptor一个内部类，它的主要作用就是链式有序调用Interceptor。</p>
+<p>Okhttp内置了5种Interceptor它们分别是RetryAndFollowUpInterceptor<br>、BridgeInterceptor、CacheInterceptor、ConnectInterceptor<br>、CallServerInterceptor。正是这5种Interceptor完成了重写、重试、缓存、请求等操作，接下来我们来逐一分析它们的作用。</p>
+<h2 id="二、Interceptor链式调用"><a href="#二、Interceptor链式调用" class="headerlink" title="二、Interceptor链式调用"></a>二、Interceptor链式调用</h2><p>拦截器调用的入口是在ReallCall的getResponseWithInterceptorChain()函数中。</p>
+<pre><code>Response getResponseWithInterceptorChain() throws IOException {
+    // Build a full stack of interceptors.
+    List&lt;Interceptor&gt; interceptors = new ArrayList&lt;&gt;();
+    interceptors.addAll(client.interceptors());
+    interceptors.add(new RetryAndFollowUpInterceptor(client));
+    interceptors.add(new BridgeInterceptor(client.cookieJar()));
+    interceptors.add(new CacheInterceptor(client.internalCache()));
+    interceptors.add(new ConnectInterceptor(client));
+    if (!forWebSocket) {
+      interceptors.addAll(client.networkInterceptors());
+    }
+    interceptors.add(new CallServerInterceptor(forWebSocket));
+    Interceptor.Chain chain = new RealInterceptorChain(interceptors, transmitter, null, 0,
+        originalRequest, this, client.connectTimeoutMillis(),
+        client.readTimeoutMillis(), client.writeTimeoutMillis());//1
+
+    boolean calledNoMoreExchanges = false;
+    try {
+      Response response = chain.proceed(originalRequest);//2
+      if (transmitter.isCanceled()) {
+        closeQuietly(response);
+        throw new IOException(&quot;Canceled&quot;);
+      }
+      return response;
+    } catch (IOException e) {
+      calledNoMoreExchanges = true;
+      throw transmitter.noMoreExchanges(e);
+    } finally {
+      if (!calledNoMoreExchanges) {
+        transmitter.noMoreExchanges(null);
+      }
+    }
+  }</code></pre><p>我们看到该函数一开始就构造了一个List然后向里边添加所有的Interceptor，包括我们自定义的Application Interceptor、系统预置的Interceptor、自定义的Network Interceptor等。<br>然后在注释1处构造RealInterceptorChain实例并传入刚刚的interceptor list还有就是我们看到第四个参数此处传入的是0。该参数表示接下来要调用interceptor list中哪个interceptor。<br>最后在注释2处调用chain.proceed（）并传入原始请求。</p>
+<pre><code>@Override public Response proceed(Request request) throws IOException {
+  return proceed(request, transmitter, exchange);
+}
+
+public Response proceed(Request request, Transmitter transmitter, @Nullable Exchange exchange)
+    throws IOException {
+  if (index &gt;= interceptors.size()) throw new AssertionError();
+
+  calls++;
+
+  // If we already have a stream, confirm that the incoming request will use it.
+  if (this.exchange != null &amp;&amp; !this.exchange.connection().supportsUrl(request.url())) {
+    throw new IllegalStateException(&quot;network interceptor &quot; + interceptors.get(index - 1)
+        + &quot; must retain the same host and port&quot;);
+  }
+
+  // If we already have a stream, confirm that this is the only call to chain.proceed().
+  if (this.exchange != null &amp;&amp; calls &gt; 1) {
+    throw new IllegalStateException(&quot;network interceptor &quot; + interceptors.get(index - 1)
+        + &quot; must call proceed() exactly once&quot;);
+  }
+
+  // Call the next interceptor in the chain.
+  RealInterceptorChain next = new RealInterceptorChain(interceptors, transmitter, exchange,
+      index + 1, request, call, connectTimeout, readTimeout, writeTimeout);//1
+  Interceptor interceptor = interceptors.get(index);//2
+  Response response = interceptor.intercept(next);//3
+
+  // Confirm that the next interceptor made its required call to chain.proceed().
+  if (exchange != null &amp;&amp; index + 1 &lt; interceptors.size() &amp;&amp; next.calls != 1) {
+    throw new IllegalStateException(&quot;network interceptor &quot; + interceptor
+        + &quot; must call proceed() exactly once&quot;);
+  }
+
+  // Confirm that the intercepted response isn&#39;t null.
+  if (response == null) {
+    throw new NullPointerException(&quot;interceptor &quot; + interceptor + &quot; returned null&quot;);
+  }
+
+  if (response.body() == null) {
+    throw new IllegalStateException(
+        &quot;interceptor &quot; + interceptor + &quot; returned a response with no body&quot;);
+  }
+
+  return response;
+}</code></pre><p>proceed函数我们主要关注3个注释处的操作。<br>在注释1处构造RealInterceptorChain，其中参数4此时变为index+1，index就是之前在getResponseWithInterceptorChain中构造RealInterceptorChain时传入的值。</p>
+<p>注释2处通过index从Interceptor list中取出对应的Interceptor。<br>注释3处调用Interceptor的intercept（）方法，参数传入注释1处构造的RealInterceptorChain。因为Interceptor的操作都是在intercept（）函数中完成的，所以该操作完成了当前Interceptor的调用。同时在每个Interceptor的intercept（）函数中都会调用next.proceed（）这样就开启了下一个Interceptor调用，如此反复最终像链条一样依次调用Interceptor list中所有的Interceptor。</p>
+<h2 id="三、详解各个Interceptor"><a href="#三、详解各个Interceptor" class="headerlink" title="三、详解各个Interceptor"></a>三、详解各个Interceptor</h2><p>上边我们分析了Interceptor是按顺序调用的，这里的顺序指的是添加到Interceptor list中的先后。由getResponseWithInterceptorChain()方法可以调用的顺序依次是（未考虑添加自定义Interceptor的情况）：RetryAndFollowUpInterceptor–&gt;BridgeInterceptor–&gt;CacheInterceptor–&gt;ConnectInterceptor–&gt;CallServerInterceptor。</p>
+<h3 id="RetryAndFollowUpInterceptor"><a href="#RetryAndFollowUpInterceptor" class="headerlink" title="RetryAndFollowUpInterceptor"></a>RetryAndFollowUpInterceptor</h3><p>RetryAndFollowUpInterceptor的作用主要是重试与重定向。<br>来看下它的Interceptor方法。</p>
+<pre><code>@Override public Response intercept(Chain chain) throws IOException {
+  Request request = chain.request();//获取传入的chain的request 此处的request是next的request
+  RealInterceptorChain realChain = (RealInterceptorChain) chain;
+  Transmitter transmitter = realChain.transmitter();
+
+  int followUpCount = 0;
+  Response priorResponse = null;
+  while (true) {//开启一个无限循环
+    transmitter.prepareToConnect(request);
+
+    if (transmitter.isCanceled()) {//如果此时请求被cancel抛出异常
+      throw new IOException(&quot;Canceled&quot;);
+    }
+
+    Response response;
+    boolean success = false;
+    try {
+      response = realChain.proceed(request, transmitter, null);//调用next的proceed方法，即调用下一个Interceptor
+      success = true;
+    } catch (RouteException e) {//如果通过某个route连接失败则尝试恢复。注意此时请求尚未发送出去
+      // The attempt to connect via a route failed. The request will not have been sent.
+      if (!recover(e.getLastConnectException(), transmitter, false, request)) {
+        throw e.getFirstConnectException();
+      }
+      continue;
+    } catch (IOException e) {//如果连接server失败则尝试恢复，注意此时请求已发送。
+      // An attempt to communicate with a server failed. The request may have been sent.
+      boolean requestSendStarted = !(e instanceof ConnectionShutdownException);
+      if (!recover(e, transmitter, requestSendStarted, request)) throw e;
+      continue;
+    } finally {
+      // The network call threw an exception. Release any resources.
+      if (!success) {//执行不成功关闭
+        transmitter.exchangeDoneDueToException();
+      }
+    }
+
+    // Attach the prior response if it exists. Such responses never have a body.
+    if (priorResponse != null) {//priorResponse不为空表示之前发生过重定向，此时为本次的response设置priorResponse
+      response = response.newBuilder()
+          .priorResponse(priorResponse.newBuilder()
+                  .body(null)
+                  .build())
+          .build();
+    }
+
+    Exchange exchange = Internal.instance.exchange(response);
+    Route route = exchange != null ? exchange.connection().route() : null;
+    Request followUp = followUpRequest(response, route);//生成重定向的请求
+
+    if (followUp == null) {//followUp == null说明无需重定向，返回当前respone
+      if (exchange != null &amp;&amp; exchange.isDuplex()) {
+        transmitter.timeoutEarlyExit();
+      }
+      return response;
+    }
+
+    RequestBody followUpBody = followUp.body();
+    if (followUpBody != null &amp;&amp; followUpBody.isOneShot()) {
+      return response;
+    }
+
+    closeQuietly(response.body());
+    if (transmitter.hasExchange()) {
+      exchange.detachWithViolence();
+    }
+
+    if (++followUpCount &gt; MAX_FOLLOW_UPS) {//判断是否超过最大重定向次数
+      throw new ProtocolException(&quot;Too many follow-up requests: &quot; + followUpCount);
+    }
+
+    request = followUp;
+    priorResponse = response;
+  }
+}
+</code></pre><p>来，梳理下整个流程：</p>
+<ol>
+<li>开启一个无限循环，直至没有重定向或有异常抛出才会结束。</li>
+<li>处理cancel</li>
+<li>调用下一个Interceptor获取respone</li>
+<li>如果步骤3发生异常，尝试恢复并重试请求</li>
+<li>如果步骤3未发生异常为，priorResponse不为空（如果priorResponse表示之前发生过重定向），为当前respone设置priorResponse（注意priorResponse body是null）</li>
+<li>调用followUpRequest根据返回的code生成用于重定向的请求</li>
+<li>步骤6生成的请求为空表示无需重定向，返回当前respone，结束循环</li>
+<li>步骤6生成的请求不为空表示需要重定向，此时重定向次数+1，然后判断是否超过最大重定向次数，未超过则跳转到步骤2开始下次循环。</li>
+</ol>
+<p>步骤3是拦截器能链式有序调用的关键。<br>步骤4的判断是否能恢复是通过recover（）函数，具体看注释</p>
+<pre><code>/**
+ * Report and attempt to recover from a failure to communicate with a server. Returns true if
+ * {@code e} is recoverable, or false if the failure is permanent. Requests with a body can only
+ * be recovered if the body is buffered or if the failure occurred before the request has been
+ * sent.
+ */
+private boolean recover(IOException e, Transmitter transmitter,
+    boolean requestSendStarted, Request userRequest) {
+  // The application layer has forbidden retries.
+//应用设置禁止重试 返回false
+  if (!client.retryOnConnectionFailure()) return false;
+
+  // We can&#39;t send the request body again.
+//request设置仅能执行一次 返回false
+  if (requestSendStarted &amp;&amp; requestIsOneShot(e, userRequest)) return false;
+
+  // This exception is fatal.
+//异常是致命的 返回false
+  if (!isRecoverable(e, requestSendStarted)) return false;
+
+  // No more routes to attempt.
+//没有更多的route可供尝试 返回fasle
+  if (!transmitter.canRetry()) return false;
+
+  // For failure recovery, use the same route selector with a new connection.
+  return true;
+}</code></pre><p>可以看出恢复操作是有条件的，在某些条件下是不能恢复的。另外上面说的不可恢复致命异常有ProtocolException、InterruptedIOException、SSLHandshakeException、CertificateException<br>、SSLPeerUnverifiedException。</p>
+<p>步骤6的followUpRequest可以说是重定向的核心了，看下followUpRequest函数</p>
+<pre><code>private Request followUpRequest(Response userResponse, @Nullable Route route) throws IOException {
+  if (userResponse == null) throw new IllegalStateException();
+  int responseCode = userResponse.code();//获取当前respone的返回code
+
+  final String method = userResponse.request().method();
+  switch (responseCode) {//根据responseCode的值分情况处理
+    case HTTP_PROXY_AUTH://407
+      Proxy selectedProxy = route != null
+          ? route.proxy()
+          : client.proxy();
+      if (selectedProxy.type() != Proxy.Type.HTTP) {
+        throw new ProtocolException(&quot;Received HTTP_PROXY_AUTH (407) code while not using proxy&quot;);
+      }
+      return client.proxyAuthenticator().authenticate(route, userResponse);//代理验证
+
+    case HTTP_UNAUTHORIZED://401
+      return client.authenticator().authenticate(route, userResponse);//身份认证
+
+    case HTTP_PERM_REDIRECT:
+    case HTTP_TEMP_REDIRECT:
+      // &quot;If the 307 or 308 status code is received in response to a request other than GET
+      // or HEAD, the user agent MUST NOT automatically redirect the request&quot;
+      if (!method.equals(&quot;GET&quot;) &amp;&amp; !method.equals(&quot;HEAD&quot;)) {//307、308 两种code不对 GET、HEAD 以外的请求重定向
+        return null;
+      }
+      // fall-through
+    case HTTP_MULT_CHOICE://300
+    case HTTP_MOVED_PERM://301
+    case HTTP_MOVED_TEMP://302
+    case HTTP_SEE_OTHER://303 
+//以上这四种code是可以进行重定向的
+      // Does the client allow redirects?
+      if (!client.followRedirects()) return null;//客户端不允许重定向 返回null
+
+      String location = userResponse.header(&quot;Location&quot;);//获取Location以确定重定向目标
+      if (location == null) return null;//Response的Location为null 返回null
+      HttpUrl url = userResponse.request().url().resolve(location);
+
+      // Don&#39;t follow redirects to unsupported protocols.
+      if (url == null) return null;
+
+      // If configured, don&#39;t follow redirects between SSL and non-SSL.
+      boolean sameScheme = url.scheme().equals(userResponse.request().url().scheme());
+      if (!sameScheme &amp;&amp; !client.followSslRedirects()) return null;
+
+      // Most redirects don&#39;t include a request body.
+      Request.Builder requestBuilder = userResponse.request().newBuilder();
+      if (HttpMethod.permitsRequestBody(method)) {
+        final boolean maintainBody = HttpMethod.redirectsWithBody(method);//是否带body重定向
+        if (HttpMethod.redirectsToGet(method)) {
+          requestBuilder.method(&quot;GET&quot;, null);
+        } else {
+          RequestBody requestBody = maintainBody ? userResponse.request().body() : null;
+          requestBuilder.method(method, requestBody);
+        }
+        if (!maintainBody) {
+          requestBuilder.removeHeader(&quot;Transfer-Encoding&quot;);
+          requestBuilder.removeHeader(&quot;Content-Length&quot;);
+          requestBuilder.removeHeader(&quot;Content-Type&quot;);
+        }
+      }
+
+      // When redirecting across hosts, drop all authentication headers. This
+      // is potentially annoying to the application layer since they have no
+      // way to retain them.
+      if (!sameConnection(userResponse.request().url(), url)) {
+        requestBuilder.removeHeader(&quot;Authorization&quot;);
+      }
+
+      return requestBuilder.url(url).build();//返回构造的重定向request
+
+    case HTTP_CLIENT_TIMEOUT://408 实际很少用到，一般需要重复发送一个相同的请求
+      // 408&#39;s are rare in practice, but some servers like HAProxy use this response code. The
+      // spec says that we may repeat the request without modifications. Modern browsers also
+      // repeat the request (even non-idempotent ones.)
+      if (!client.retryOnConnectionFailure()) {
+        // The application layer has directed us not to retry the request.
+        return null;
+      }
+
+      RequestBody requestBody = userResponse.request().body();
+      if (requestBody != null &amp;&amp; requestBody.isOneShot()) {
+        return null;
+      }
+
+      if (userResponse.priorResponse() != null
+          &amp;&amp; userResponse.priorResponse().code() == HTTP_CLIENT_TIMEOUT) {
+        // We attempted to retry and got another timeout. Give up.
+        return null;
+      }
+
+      if (retryAfter(userResponse, 0) &gt; 0) {
+        return null;
+      }
+
+      return userResponse.request();
+
+    case HTTP_UNAVAILABLE://503
+      if (userResponse.priorResponse() != null
+          &amp;&amp; userResponse.priorResponse().code() == HTTP_UNAVAILABLE) {
+        // We attempted to retry and got another timeout. Give up.
+        return null;
+      }
+
+      if (retryAfter(userResponse, Integer.MAX_VALUE) == 0) {
+        // specifically received an instruction to retry without delay
+        return userResponse.request();
+      }
+
+      return null;
+
+    default:
+      return null;
+  }
+}</code></pre><p>followUpRequest主要是根据返回的code分情况处理，如果允许重定向则返回新构造的request否则返回null表示不允许重定向。</p>
+<h3 id="BridgeInterceptor"><a href="#BridgeInterceptor" class="headerlink" title="BridgeInterceptor"></a>BridgeInterceptor</h3><p>BridgeInterceptor名为桥接拦截器主要作用就是把我们传入的request“重写”为实际向server请求的request，收到respone后“重写”respone。来看下其intercept函数</p>
+<pre><code>@Override public Response intercept(Chain chain) throws IOException {
+  Request userRequest = chain.request();
+  Request.Builder requestBuilder = userRequest.newBuilder();
+
+  RequestBody body = userRequest.body();//获取请求body
+  if (body != null) {//请求发送前“重写”headers
+    MediaType contentType = body.contentType();
+    if (contentType != null) {
+      requestBuilder.header(&quot;Content-Type&quot;, contentType.toString());
+    }
+
+    long contentLength = body.contentLength();
+    if (contentLength != -1) {
+      requestBuilder.header(&quot;Content-Length&quot;, Long.toString(contentLength));
+      requestBuilder.removeHeader(&quot;Transfer-Encoding&quot;);
+    } else {
+      requestBuilder.header(&quot;Transfer-Encoding&quot;, &quot;chunked&quot;);
+      requestBuilder.removeHeader(&quot;Content-Length&quot;);
+    }
+  }
+
+  if (userRequest.header(&quot;Host&quot;) == null) {
+    requestBuilder.header(&quot;Host&quot;, hostHeader(userRequest.url(), false));
+  }
+
+  if (userRequest.header(&quot;Connection&quot;) == null) {
+    requestBuilder.header(&quot;Connection&quot;, &quot;Keep-Alive&quot;);
+  }
+
+  // If we add an &quot;Accept-Encoding: gzip&quot; header field we&#39;re responsible for also decompressing
+  // the transfer stream.
+  boolean transparentGzip = false;
+  if (userRequest.header(&quot;Accept-Encoding&quot;) == null &amp;&amp; userRequest.header(&quot;Range&quot;) == null) {
+    transparentGzip = true;
+    requestBuilder.header(&quot;Accept-Encoding&quot;, &quot;gzip&quot;);
+  }
+
+  List&lt;Cookie&gt; cookies = cookieJar.loadForRequest(userRequest.url());
+  if (!cookies.isEmpty()) {//cookie不为空则添加cookie
+    requestBuilder.header(&quot;Cookie&quot;, cookieHeader(cookies));
+  }
+
+  if (userRequest.header(&quot;User-Agent&quot;) == null) {//设置User-Agent
+    requestBuilder.header(&quot;User-Agent&quot;, Version.userAgent());
+  }
+
+  Response networkResponse = chain.proceed(requestBuilder.build());//开启下一个拦截器的调用
+
+  HttpHeaders.receiveHeaders(cookieJar, userRequest.url(), networkResponse.headers());//从这里开始是收到respone然后对其“重写”
+
+  Response.Builder responseBuilder = networkResponse.newBuilder()
+      .request(userRequest);
+
+  if (transparentGzip
+      &amp;&amp; &quot;gzip&quot;.equalsIgnoreCase(networkResponse.header(&quot;Content-Encoding&quot;))
+      &amp;&amp; HttpHeaders.hasBody(networkResponse)) {//如果之前采用gzip进行压缩，那么需要对respone进行解压
+    GzipSource responseBody = new GzipSource(networkResponse.body().source());
+    Headers strippedHeaders = networkResponse.headers().newBuilder()
+        .removeAll(&quot;Content-Encoding&quot;)
+        .removeAll(&quot;Content-Length&quot;)
+        .build();
+    responseBuilder.headers(strippedHeaders);
+    String contentType = networkResponse.header(&quot;Content-Type&quot;);
+    responseBuilder.body(new RealResponseBody(contentType, -1L, Okio.buffer(responseBody)));
+  }
+
+  return responseBuilder.build();
+}
+</code></pre><p>BridgeInterceptor完成的工作可以分为3步：</p>
+<ol>
+<li>请求发送前对request“重写”，重写后的request才是实际去用来请求的request。</li>
+<li>调用chain.proceed开启下一个拦截器调用，并拿到respone</li>
+<li>对返回的respone进行“重写”，我们拿到的respone就是重写后的</li>
+</ol>
+<p>对request和respone的“重写”基本都是针对其headers，比如发送请求前未设置Accept-EncodingOkhttp会为你设置，在有cookie的情况下为你添加cookie，在拿到respone后如果需要解压缩Okhttp会为你自动解压缩。</p>
+<h3 id="CacheInterceptor"><a href="#CacheInterceptor" class="headerlink" title="CacheInterceptor"></a>CacheInterceptor</h3><p>CacheInterceptor是缓存拦截器，主要作用是定义Okhttp的缓存机制。</p>
+<pre><code>@Override public Response intercept(Chain chain) throws IOException {
+  Response cacheCandidate = cache != null
+      ? cache.get(chain.request())
+      : null;//若当前有cache则根据请求获取对应的缓存
+
+  long now = System.currentTimeMillis();
+
+  //构造缓存策略
+  CacheStrategy strategy = new CacheStrategy.Factory(now, chain.request(), cacheCandidate).get();
+  Request networkRequest = strategy.networkRequest;
+  Response cacheResponse = strategy.cacheResponse;
+
+  if (cache != null) {
+    cache.trackResponse(strategy);
+  }
+
+  if (cacheCandidate != null &amp;&amp; cacheResponse == null) {//有缓存但不可用关闭
+    closeQuietly(cacheCandidate.body()); // The cache candidate wasn&#39;t applicable. Close it.
+  }
+
+  // If we&#39;re forbidden from using the network and the cache is insufficient, fail.
+
+  //如果设置禁止从网络获取响应且缓存不可用那么返回失败
+  if (networkRequest == null &amp;&amp; cacheResponse == null) {
+    return new Response.Builder()
+        .request(chain.request())
+        .protocol(Protocol.HTTP_1_1)
+        .code(504)
+        .message(&quot;Unsatisfiable Request (only-if-cached)&quot;)
+        .body(Util.EMPTY_RESPONSE)
+        .sentRequestAtMillis(-1L)
+        .receivedResponseAtMillis(System.currentTimeMillis())
+        .build();
+  }
+
+  // If we don&#39;t need the network, we&#39;re done.
+  //从cache获取respone不使用网络
+  if (networkRequest == null) {
+    return cacheResponse.newBuilder()
+        .cacheResponse(stripBody(cacheResponse))
+        .build();
+  }
+
+  Response networkResponse = null;
+  try {
+    networkResponse = chain.proceed(networkRequest);//调用下一个拦截器，从网络获取respone
+  } finally {
+    // If we&#39;re crashing on I/O or otherwise, don&#39;t leak the cache body.
+    if (networkResponse == null &amp;&amp; cacheCandidate != null) {
+      closeQuietly(cacheCandidate.body());
+    }
+  }
+
+  // If we have a cache response too, then we&#39;re doing a conditional get.
+  if (cacheResponse != null) {
+    if (networkResponse.code() == HTTP_NOT_MODIFIED) {//从网络获取respone且缓存非空 如果返回码为304 则更新缓存然后返回
+      Response response = cacheResponse.newBuilder()
+          .headers(combine(cacheResponse.headers(), networkResponse.headers()))
+          .sentRequestAtMillis(networkResponse.sentRequestAtMillis())
+          .receivedResponseAtMillis(networkResponse.receivedResponseAtMillis())
+          .cacheResponse(stripBody(cacheResponse))
+          .networkResponse(stripBody(networkResponse))
+          .build();
+      networkResponse.body().close();
+
+      // Update the cache after combining headers but before stripping the
+      // Content-Encoding header (as performed by initContentStream()).
+      cache.trackConditionalCacheHit();
+      cache.update(cacheResponse, response);
+      return response;
+    } else {
+      closeQuietly(cacheResponse.body());
+    }
+  }
+
+  //没有缓存可供使用，读取网络响应构造respone
+  Response response = networkResponse.newBuilder()
+      .cacheResponse(stripBody(cacheResponse))
+      .networkResponse(stripBody(networkResponse))
+      .build();
+
+  if (cache != null) {//cache不为空 把respone缓存到cache
+    if (HttpHeaders.hasBody(response) &amp;&amp; CacheStrategy.isCacheable(response, networkRequest)) {
+      // Offer this request to the cache.
+      CacheRequest cacheRequest = cache.put(response);
+      return cacheWritingResponse(cacheRequest, response);
+    }
+
+    if (HttpMethod.invalidatesCache(networkRequest.method())) {
+      try {
+        cache.remove(networkRequest);
+      } catch (IOException ignored) {
+        // The cache cannot be written.
+      }
+    }
+  }
+
+  return response;
+}</code></pre><p>整个流程如下：</p>
+<ol>
+<li>判断是否有Cache，有的话根据request去尝试获取缓存</li>
+<li>构造缓存策略</li>
+<li>步骤1获取的缓存respone不为空但是不可用，关闭连接</li>
+<li>设置禁止从网络获取响应且缓存不可用那么返回504失败</li>
+<li>从cache获取respone 不使用网络（步骤1-5的作用就是在有请求时先尝试从本地获取缓存如果失败才会去从网络获取否则返回缓存）</li>
+<li>调用下一个拦截器，从网络获取respone</li>
+<li>从网络获取respone且缓存非空 如果返回码为304 则更新缓存然后返回</li>
+<li>没有缓存可供使用，读取网络响应构造respone</li>
+<li>cache不为空 把respone缓存到cache（步骤6-9作用就是从网络获取respone然后把获得的respone缓存到本地）</li>
+</ol>
+<p>CacheInterceptor中涉及两个类：Cache、CacheStrategy，这里先不展开分析，等分析Okhttp缓存机制时再做详细介绍。</p>
+<h3 id="ConnectInterceptor"><a href="#ConnectInterceptor" class="headerlink" title="ConnectInterceptor"></a>ConnectInterceptor</h3><p>ConnectInterceptor是连接拦截器，它的intercept函数非常简洁：</p>
+<pre><code>@Override public Response intercept(Chain chain) throws IOException {
+  RealInterceptorChain realChain = (RealInterceptorChain) chain;
+  Request request = realChain.request();
+  Transmitter transmitter = realChain.transmitter();//获取Transmitter
+  // We need the network to satisfy this request. Possibly for validating a conditional GET.
+  boolean doExtensiveHealthChecks = !request.method().equals(&quot;GET&quot;);
+  Exchange exchange = transmitter.newExchange(chain, doExtensiveHealthChecks);//构造Exchange
+
+  return realChain.proceed(request, transmitter, exchange);//开启下一个拦截器调用并传入Transmitter、Exchange。
+}</code></pre><p>它首先获取Transmitter，然后通过Transmitter的newExchange方法创建一个Exchange，把它传到下一个拦截器。<br>Transmitter是应用和网络之间的一个桥梁，通过transmitter.newExchange构造一个Exchange实例</p>
+<pre><code>Exchange newExchange(Interceptor.Chain chain, boolean doExtensiveHealthChecks) {
+  synchronized (connectionPool) {
+    if (noMoreExchanges) {
+      throw new IllegalStateException(&quot;released&quot;);
+    }
+    if (exchange != null) {
+      throw new IllegalStateException(&quot;cannot make a new request because the previous response &quot;
+          + &quot;is still open: please call response.close()&quot;);
+    }
+  }
+
+  ExchangeCodec codec = exchangeFinder.find(client, chain, doExtensiveHealthChecks);
+  Exchange result = new Exchange(this, call, eventListener, exchangeFinder, codec);
+
+  synchronized (connectionPool) {
+    this.exchange = result;
+    this.exchangeRequestDone = false;
+    this.exchangeResponseDone = false;
+    return result;
+  }
+}</code></pre><p>newExchange主要做了两件事：调用ExchangeFinder.find获取一个ExchangeCodec、构造一个Exchange。<br>ExchangeFinder就是负责连接的创建，把创建好的连接放入连接池，如果连接池中已经有该连接，就直接取出复用。而ExchangeCodec则是对HTTP请求和HTTP响应编码<br>Exchange则是用来进行发送和接收HTTP request和respone。</p>
+<h3 id="CallServerInterceptor"><a href="#CallServerInterceptor" class="headerlink" title="CallServerInterceptor"></a>CallServerInterceptor</h3><p>CallServerInterceptor是拦截器链中最后一个拦截器，与服务器的交互如，发出请求和接收响应都是它完成的。</p>
+<pre><code>@Override public Response intercept(Chain chain) throws IOException {
+  RealInterceptorChain realChain = (RealInterceptorChain) chain;
+  Exchange exchange = realChain.exchange();
+  Request request = realChain.request();
+
+  long sentRequestMillis = System.currentTimeMillis();
+
+  exchange.writeRequestHeaders(request);//向服务端写请求
+
+  boolean responseHeadersStarted = false;
+  Response.Builder responseBuilder = null;
+  if (HttpMethod.permitsRequestBody(request.method()) &amp;&amp; request.body() != null) {
+    // If there&#39;s a &quot;Expect: 100-continue&quot; header on the request, wait for a &quot;HTTP/1.1 100
+    // Continue&quot; response before transmitting the request body. If we don&#39;t get that, return
+    // what we did get (such as a 4xx response) without ever transmitting the request body.
+    if (&quot;100-continue&quot;.equalsIgnoreCase(request.header(&quot;Expect&quot;))) {
+      exchange.flushRequest();
+      responseHeadersStarted = true;
+      exchange.responseHeadersStart();
+      responseBuilder = exchange.readResponseHeaders(true);
+    }
+
+    if (responseBuilder == null) {
+      if (request.body().isDuplex()) {
+        // Prepare a duplex body so that the application can send a request body later.
+        exchange.flushRequest();
+        BufferedSink bufferedRequestBody = Okio.buffer(
+            exchange.createRequestBody(request, true));
+        request.body().writeTo(bufferedRequestBody);
+      } else {
+        // Write the request body if the &quot;Expect: 100-continue&quot; expectation was met.
+        BufferedSink bufferedRequestBody = Okio.buffer(
+            exchange.createRequestBody(request, false));
+        request.body().writeTo(bufferedRequestBody);
+        bufferedRequestBody.close();
+      }
+    } else {
+      exchange.noRequestBody();
+      if (!exchange.connection().isMultiplexed()) {
+        // If the &quot;Expect: 100-continue&quot; expectation wasn&#39;t met, prevent the HTTP/1 connection
+        // from being reused. Otherwise we&#39;re still obligated to transmit the request body to
+        // leave the connection in a consistent state.
+        exchange.noNewExchangesOnConnection();
+      }
+    }
+  } else {
+    exchange.noRequestBody();
+  }
+
+  if (request.body() == null || !request.body().isDuplex()) {
+    exchange.finishRequest();
+  }
+
+  if (!responseHeadersStarted) {
+    exchange.responseHeadersStart();//从服务端获取请求
+  }
+
+  if (responseBuilder == null) {
+    responseBuilder = exchange.readResponseHeaders(false);
+  }
+
+  Response response = responseBuilder
+      .request(request)
+      .handshake(exchange.connection().handshake())
+      .sentRequestAtMillis(sentRequestMillis)
+      .receivedResponseAtMillis(System.currentTimeMillis())
+      .build();
+
+  int code = response.code();
+  if (code == 100) {
+    // server sent a 100-continue even though we did not request one.
+    // try again to read the actual response
+    response = exchange.readResponseHeaders(false)
+        .request(request)
+        .handshake(exchange.connection().handshake())
+        .sentRequestAtMillis(sentRequestMillis)
+        .receivedResponseAtMillis(System.currentTimeMillis())
+        .build();
+
+    code = response.code();
+  }
+
+  exchange.responseHeadersEnd(response);
+
+  if (forWebSocket &amp;&amp; code == 101) {
+    // Connection is upgrading, but we need to ensure interceptors see a non-null response body.
+    response = response.newBuilder()
+        .body(Util.EMPTY_RESPONSE)
+        .build();
+  } else {
+    response = response.newBuilder()
+        .body(exchange.openResponseBody(response))
+        .build();
+  }
+
+  if (&quot;close&quot;.equalsIgnoreCase(response.request().header(&quot;Connection&quot;))
+      || &quot;close&quot;.equalsIgnoreCase(response.header(&quot;Connection&quot;))) {
+    exchange.noNewExchangesOnConnection();
+  }
+
+  if ((code == 204 || code == 205) &amp;&amp; response.body().contentLength() &gt; 0) {
+    throw new ProtocolException(
+        &quot;HTTP &quot; + code + &quot; had non-zero Content-Length: &quot; + response.body().contentLength());
+  }
+
+  return response;
+}</code></pre><p>在ConnectInterceptor中我们已经与服务器建立了连接，获取了输入输出流，所以CallServerInterceptor的intercept(Chain)方法逻辑就是把请求发送到服务器，然后获取服务器的响应。</p>
+<h4 id="发送请求"><a href="#发送请求" class="headerlink" title="发送请求"></a>发送请求</h4><p>通过Exchange的writeRequestHeaders(request)方法写入请求的header；如果请求的body不为空，通过okio写入请求的body。</p>
+<h4 id="获取响应"><a href="#获取响应" class="headerlink" title="获取响应"></a>获取响应</h4><p>通过Exchange的readResponseHeaders(boolean)方法读取响应的header；通过Exchange的openResponseBody(Response)方法读取响应的body。</p>
+<p>可以看出发送请求个获取响应都是通过exchange来进行的。</p>
+<p>至此Okhttp的拦截器机制我们就分析完了，以上是Okhttp已经定义好的拦截器，在实际的使用中我们可以自定义拦截器来完成我们想要的功能。</p>
+
+            <hr>
+          </div>
+          <br>
+          <div>
+            <div id="post-tag">
+              
+              <span>
+                <i class="iconfont icon-tag"></i>
+                
+                  <a class="hover-with-bg" href="/tags/Okhttp">Okhttp</a>
+                
+              </span>
+            </div>
+            
+              <div id="post-note">
+                <div><strong>本文作者：</strong><a href="/">myname</a></div>
+                <div><strong>本文链接：</strong><a href="http://yoursite.com/2019/11/17/Okhttp3/">http://yoursite.com/2019/11/17/Okhttp3/</a></div>
+                <div><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</div>
+              </div>
+            
+            
+              <div id="post-nav" class="container">
+                  <div class="row">
+                    
+                      <a href="/2019/11/24/Okhttp4/" id="post-nav-prev" class="col">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="post-nav-title">Okhttp解析之—okhttp缓存机制</span>
+                      </a>
+                    
+                    
+                      <a href="/2019/11/12/Okhttp2/" id="post-nav-next" class="col">
+                        <span class="post-nav-title">Okhttp解析之--基本使用流程分析</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+            
+          </div>
+        </div>
+
+        <!-- custom -->
+        
+
+        <!-- Comments -->
+        <div class="col-lg-10 mx-auto nopadding-md">
+          <div class="container comments mx-auto" id="comments">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;ディレクトリ</p>
+    <div id="tocbot"></div>
+  </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+  </main>
+  
+<div id="sidebar" class="sidebar-hide">
+  <span class="sidebar-button sidebar-button-shift" id="toggle-sidebar" >
+    <i class="fa fa-arrow-right on" aria-hidden="true"></i>
+  </span>
+  <div class="sidebar-overlay"></div>
+  <div class="sidebar-intrude">
+    <div class="sidebar-avatar">
+      <img src="/img/favicon.png" srcset="/img/favicon.png" alt="avatar"/>
+    </div>
+    <div class="text-center sidebar-about">
+      <p class="h3 sidebar-author">Robin</p>
+      <p class="sidebar-subtitle"></p>
+      
+        <a href="https://github.com" class="h4" target="_blank">
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="https://twitter.com" class="h4" target="_blank">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="mailto:example@example.com" class="h4" target="_blank">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+    </div>
+    <div class="sidebar-friend">
+      <p class="h6 sidebar-friend-title">
+        <span class="sidebar-label-left"><i class="fas fa-user-friends"></i></span>
+        <span class="sidebar-label">友情链接</span>
+      </p>
+      <ul class="list-group">
+        
+          <a href="https://example.com/" target="_blank">
+            <li class="list-group-item">
+              <i class="fas fa-quote-left"></i>&nbsp;
+              friendname
+            </li>
+          </a>
+        
+    </ul>
+    </div>
+  </div>
+</div>
+
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">検索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">キーワード</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <div id="footerContent"  class="rgba-black-slight">
+<footer class="pt-5">
+  <div class="text-center py-3">
+  
+
+    
+      <div class="footer-copyright">
+        
+          ©2020&nbsp;robin
+        
+        
+          
+            <i class="iconfont icon-love"></i>
+          
+          <span>运转了<span id="runtime"></span>天</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+    
+  </div>
+</footer>
+</div>
+<!-- SCRIPTS -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js" ></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
+<script src="https://cdn.staticfile.org/mdbootstrap/4.8.9/js/mdb.min.js" ></script>
+<script src="/js/main.js" ></script>
+
+  <script src="/js/lazyload.js" ></script>
+
+
+  
+    <script src="https://cdn.staticfile.org/tocbot/4.8.0/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
+<!-- Plugins -->
+
+  <script src="https://cdn.staticfile.org/prettify/r298/prettify.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/typed.js/2.0.10/typed.min.js" ></script>
+  <script type="text/javascript">
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Okhttp解析之--Interceptor详解&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/anchor-js/4.2.0/anchor.min.js" ></script>
+  <script type="text/javascript">
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+  <script src="/js/local-search.js" ></script>
+  <script type="text/javascript">
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script type="text/javascript">
+  /* Fancybox */
+  var setupFancybox = function () {
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(function() {
+    var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      $(this).wrap(element);
+    });
+  };
+  setupFancybox();
+  </script>
+
+
+
+
+  <!-- 首页文章列表随机图片 -->
+  <script type="text/javascript">
+    $("img.image_random").each(function(){
+      
+        var xjhUrl = "//img.xjh.me/random_img.php?return=json";
+      
+      var _this = $(this);
+      $.get(xjhUrl,function(data,status){
+        if(status === "success"){
+          if(data.result === 200){
+            _this[0].src = data.img;
+          }
+        }
+      });
+    });
+  </script>
+
+
+
+
+  <script async src="//cdn.jsdelivr.net/npm/busuanzi@2.3.0/bsz.pure.mini.js" ></script>
+  
+
+
+  
+  
+    <script type="text/javascript">
+      //定义获取词语下标
+      var a_idx = 0;
+      jQuery(document).ready(function ($) {
+        //点击body时触发事件
+        $("body").click(function (e) {
+          //需要显示的词语
+          var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+          //设置词语给span标签
+          var $i = $("<span/>").text(a[a_idx]);
+          //下标等于原来下标+1  余 词语总数
+          a_idx = (a_idx + 1) % a.length;
+          //获取鼠标指针的位置，分别相对于文档的左和右边缘。
+          //获取x和y的指针坐标
+          var x = e.pageX, y = e.pageY;
+          //在鼠标的指针的位置给$i定义的span标签添加css样式
+          $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": rand_color()
+          });
+          // 随机颜色
+          function rand_color() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+          }
+          //在body添加这个标签
+          $("body").append($i);
+          //animate() 方法执行 CSS 属性集的自定义动画。
+          //该方法通过CSS样式将元素从一个状态改变为另一个状态。CSS属性值是逐渐改变的，这样就可以创建动画效果。
+          //详情请看http://www.w3school.com.cn/jquery/effect_animate.asp
+          $i.animate({
+            //将原来的位置向上移动180
+            "top": y - 180,
+            "opacity": 0
+            //1500动画的速度
+          }, 1500, function () {
+            //时间到了自动删除
+            $i.remove();
+          });
+        });
+      })
+      ;
+    </script>
+  
+
+
+<!-- Functions -->
+<script type="text/javascript">
+  /* 切换背景 */
+  
+    $("body").removeClass("banner-bg");
+    $("#background").addClass("banner-bg");
+    $('#mainContent').removeClass("rgba-black-slight");
+    $('#footerContent').removeClass("rgba-black-slight");
+    if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) || (/Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent))) {
+      $("#background").css("background-attachment", "scroll");
+    }
+  
+</script>
+
+  <script type="text/javascript">
+    /*显示博客运行时间*/
+    var blogRunTime = function () {
+      var runTime = document.getElementById("runtime");
+      var runtimeDate = "2019,04,20";
+	    var createDate = new Date(runtimeDate);
+	    var nowDate = new Date();
+	    var dateLine = nowDate.getTime() - createDate.getTime();
+	    var runDate = Math.floor(dateLine / (1000 * 60 * 60 * 24));
+	    runTime.innerHTML = runDate;
+    };
+    $(document).ready(function(){
+	    blogRunTime();
+    });
+  </script>
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+  
+</body>
+</html>

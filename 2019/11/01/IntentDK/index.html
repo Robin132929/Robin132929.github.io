@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="author" content="robin">
+  
+  
+    <meta name="keywords" content="Basics,Intent," />
+  
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <title>Intent知识详解 ~ Robin</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.10.2/css/all.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.8.9/css/mdb.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css"  >
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+  <link rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css"  >
+
+
+  <link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"  >
+
+<link rel="stylesheet" href="/css/main.css"  >
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+  <style type="text/css">
+    .banner-bg {
+      
+        background-image: url('/img/default.png');
+      
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  </style>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="banner-bg">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Robin</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">主页</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/reading/">读书</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/photo/">相册</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">归档</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">标签</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+</nav>
+
+    <div class="view intro-2 rgba-black-slight" id="background">
+      <div class="full-bg-img">
+        <div class="mask flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+            
+              <br>
+              <p class="mt-3">
+                <i class="far fa-calendar-alt"></i>
+                <span class="post-date">2019-11-01&nbsp;|&nbsp;</span>
+                <i class="far fa-chart-bar"></i>
+                <span class="post-count">3.5k</span>字&nbsp;|&nbsp;
+                <i class="far fa-clock"></i>
+                <span class="post-count">14</span>分钟
+                
+                  <span id="busuanzi_container_page_pv" style="display:none">
+                    &nbsp;|&nbsp;
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv"></span>次
+                  </span>
+                
+              </p>
+            
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="rgba-black-slight">
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto" id="post">
+          <div class="markdown-body">
+            <h1 id="Intent知识详解"><a href="#Intent知识详解" class="headerlink" title="Intent知识详解"></a>Intent知识详解</h1><h2 id="一、什么是Intent"><a href="#一、什么是Intent" class="headerlink" title="一、什么是Intent"></a>一、什么是Intent</h2><p>贴一个官方解释：</p>
+<blockquote>
+<p>An intent is an abstract description of an operation to be performed. It can be used with <a href="https://developer.android.google.cn/reference/kotlin/android/content/Context.html#startActivity(android.content.Intent)" target="_blank" rel="noopener">Context#startActivity(Intent)</a> to launch an <a href="https://developer.android.google.cn/reference/kotlin/android/app/Activity.html" target="_blank" rel="noopener">android.app.Activity</a> , <a href="https://developer.android.google.cn/reference/kotlin/android/content/Context.html#sendBroadcast(android.content.Intent)" target="_blank" rel="noopener">broadcastIntent</a> to send it to any interested <a href="https://developer.android.google.cn/reference/kotlin/android/content/BroadcastReceiver.html" target="_blank" rel="noopener">BroadcastReceiver</a> components, and <a href="https://developer.android.google.cn/reference/kotlin/android/content/Context.html#startService(android.content.Intent)" target="_blank" rel="noopener">android.content.Context#startService</a> or <a href="https://developer.android.google.cn/reference/kotlin/android/content/Context.html#bindService(android.content.Intent,%20android.content.ServiceConnection,%20kotlin.Int)" target="_blank" rel="noopener">android.content.Context#bindService</a> to communicate with a background <a href="https://developer.android.google.cn/reference/kotlin/android/app/Service.html" target="_blank" rel="noopener">android.app.Service</a> .<br>An Intent provides a facility for performing late runtime binding between the code in different applications. Its most significant use is in the launching of activities, where it can be thought of as the glue between activities. It is basically a passive data structure holding an abstract description of an action to be performed.</p>
+</blockquote>
+<p>Intent 名为意图，它是要执行操作的抽象描述，可以在activity、broadcast、service等组件进行请求操作时用来充当消息传递对象（intent可传递基础类型数据或者可序列化的对象数据）此时Intent包含要执行的动作的抽象描述。</p>
+<h2 id="二、分类"><a href="#二、分类" class="headerlink" title="二、分类"></a>二、分类</h2><p>Intent主要分为两大类：显示Intent和隐式Intent。</p>
+<h3 id="显示Intent"><a href="#显示Intent" class="headerlink" title="显示Intent"></a>显示Intent</h3><p><strong>定义 ：</strong>显示的指定具体类名启动一个组件 一般用于同应用内的组件启动 因为可以方便的知道启动组件的类名</p>
+<p><strong>使用方式：</strong>1、通过Intent构造函数传入要启动类名<br>                     2、直接设置要启动类名（调用setComponent(), setClass(), setClassName()传入组件名）</p>
+<h3 id="隐式Intent"><a href="#隐式Intent" class="headerlink" title="隐式Intent"></a>隐式Intent</h3><p><strong>定义 ：</strong>不知道要启动的组件名，通过匹配其他组件中manifest文件的Intent-filter，启动符合条件的组件，并把Intent中的参数传过去，一般用于启动外部应用的组件</p>
+<p><strong>使用方式：</strong>通过设置action、Category、data等去匹配符合条件的组件（<strong>注意：</strong>如果有多个intent-filter满足条件，那么系统会弹出一个对话框，由用户决定启动哪个组件 ）</p>
+<p><strong><em>假如我们不希望其他应用启动我们的组件，只希望在本应用中使用组件，那么我们就不要在清单中声明，并且将该组件的 exported 属性设置为 false</em></strong></p>
+<h2 id="三、intent工作流程"><a href="#三、intent工作流程" class="headerlink" title="三、intent工作流程"></a>三、intent工作流程</h2><p>以Activity A启动Activity B为例说明：<br>1、首先Activity A调用startActivity()并传入的Intent<br>2、系统会根据该Intent的条件搜索Android系统中所有匹配的组件<br>3、若找到了匹配intent的intent-filters所属的组件（Activity B），则启动该组件，并回调onCreate()方法，同时将Intent传递过去</p>
+<p><img src="https://developer.android.google.cn/images/components/intent-filters_2x.png" srcset="/img/loading.gif" alt="Intent"></p>
+<h2 id="四、构建Intent"><a href="#四、构建Intent" class="headerlink" title="四、构建Intent"></a>四、构建Intent</h2><p>Intent的构建主要是为其设置各种属性包括：<strong>action</strong>、<strong>data</strong>、<strong>type</strong>、<strong>component</strong>、<strong>category</strong>、<strong>extras</strong>、<strong>flags</strong>。其中主要属性是<strong>action</strong>、<strong>data</strong> 。下面我们来详细解析下每个属性的意义和作用。</p>
+<h3 id="action"><a href="#action" class="headerlink" title="action"></a>action</h3><p>action是指要执行的动作。它很大程度上决定了category和data中应传入的信息；除了官方定义的我们也可以自己定义action，以便让其他应用程序启动自己的组件。action可以通过setAction来设置或者在Intent构造函数中设置。</p>
+<pre><code>系统提供的常用Action：
+public static final String ACTION_MAIN = “android.intent.action.MAIN”; //Android 的程序入口
+public static final String ACTION_VIEW = “android.intent.action.VIEW”; //显示指定数据
+public static final String ACTION_WEB_SEARCH = “android.intent.action.WEB_SEARCH”;//网页搜索关键字
+public static final String ACTION_CALL = “android.intent.action.CALL”; //直接呼叫 Data 中所带的号码</code></pre><h3 id="data"><a href="#data" class="headerlink" title="data"></a>data</h3><p>data 属性通常是为 Action 属性提供要操作的数据,Data 属性的值是一个 Uri 对象，格式是：schema://host:port/path 。其各个字段含义如下：<br>      * schema 协议 比如“http”、“https”、“tel”…<br>      * host 主机名如“google.com”，如果定义为“*”则表示任意主机名<br>      * port 端口号<br>      * path 路径</p>
+<p> 可以通过setData设置data 。</p>
+<h3 id="type"><a href="#type" class="headerlink" title="type"></a>type</h3><p>Type 属性用于指定 Data 所制定的 Uri 对应的MIME 类型。MIME 类型是设定某种扩展名的 文件用一种应用程序来打开的方式类型。常见MIME类型 ： “image/png”、”image/jpeg”</p>
+<p>可以通过setType设置 type。<br><strong><em>但是要注意的是如果您需要同时设置URI和MIME类型，只能调用setDataAndType()方法，而不能分别调用setData()和setType()，因为调用setData()时会首先将setType()中的内容置空，反之亦然。</em></strong></p>
+<h3 id="component"><a href="#component" class="headerlink" title="component"></a>component</h3><p>component是要启动目标组件的名字。对于显式启动，这是不可缺省的，没有指定 ComponentName 属性的 Intent 被称为隐式 Intent。</p>
+<p>可以通过调用setComponent(), setClass(), setClassName()等方法设置或者通过Intent的构造方法设置。</p>
+<h3 id="category"><a href="#category" class="headerlink" title="category"></a>category</h3><p>category是要执行动作的目标所具有的特质或行为归类（为 Action 增加额外的附加类别信息）<br>几个常见的category如下：</p>
+<pre><code>Intent.CATEGORY_DEFAULT（android.intent.category.DEFAULT）// 默认的category
+
+Intent.CATEGORY_PREFERENCE（android.intent.category.PREFERENCE） //表示该目标Activity是一个首选项界面；
+
+Intent.CATEGORY_BROWSABLE（android.intent.category.BROWSABLE）//指定了此category后，在网页上点击图片或链接时，系统会考虑将此目标Activity列入可选列表，供用户选择以打开图片或链接。</code></pre><p>可以通过setCategory来进行设置。</p>
+<h3 id="flags"><a href="#flags" class="headerlink" title="flags"></a>flags</h3><p>flags为intent添加元数据（meta-data），flag可以指导系统以何种方式启动一个activity、是否将启动的activity放在该应用的任务栈中，等等。<br>常用flags：</p>
+<pre><code>FLAG_ACTIVITY_NEW_TASK：设置这个标记位的话，是为 Activity 指定 “singleTask” 启动模式，它的作用和在清单文件中指定该启动模式的效果一样。
+FLAG_ACTIVITY_SINGLE_TOP：设置这个标记位的话，是为 Activity 指定 “singleTop” 启动模式，它的作用和在清单文件中指定该启动模式的效果一样。
+FLAG_ACTIVITY_CLEAR_TOP：具有此标记位的 Activity ，在它启动时，在同一个任务栈中所有位于它上面的 Activity 都要出栈。
+FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS：具有这个标记的 Activity 不会出现在历史 Activity 的列表中。它等同于在清单文件中指定 Activity 的属性 android:excludeFromRecents=“true”</code></pre><p>可以通过setFlags来进行设置。</p>
+<h3 id="extras"><a href="#extras" class="headerlink" title="extras"></a>extras</h3><p>extras用于添加一些附加信息，它的属性值是一个 Bundle 对象，通过键值对的形式存储数据。</p>
+<p>需要注意的是在使用putExtras方法设置Bundle对象之后，系统进行的不是引用操作，而是复制操作，所以如果设置完之后再更改bundle实例中的数据，将不会影响Intent内部的附加信息。</p>
+<p>可以通过putExtras来进行设置。</p>
+<h3 id="Intent属性小结"><a href="#Intent属性小结" class="headerlink" title="Intent属性小结"></a>Intent属性小结</h3><p>Component name, action, data, and category代表了intent的属性，通过设置这些参数，系统可以筛选出符合条件的目标组件。但是，Extras、Flags这两个参数系统不会用来筛选目标组件。</p>
+<h2 id="五、IntentFilter匹配规则"><a href="#五、IntentFilter匹配规则" class="headerlink" title="五、IntentFilter匹配规则"></a>五、IntentFilter匹配规则</h2><p>IntentFilter是manifest文件中组件内部的一个标签，该标签描述了组件具备什么特性，如果您未配置intent-filters，那个该组件只能被显式启动。我们在mainfest中设置的ntent-filters如果可以匹配某个隐式Intent那么该组件就可以被启动。IntentFilter在做匹配时主要是根据action, type, category这三个属性且匹配优先级是：action&gt;data&gt;category</p>
+<h4 id="action匹配规则："><a href="#action匹配规则：" class="headerlink" title="action匹配规则："></a>action匹配规则：</h4><p>如果Intent指明定了action，则目标组件的IntentFilter的action列表中就必须包含有这个action，否则不能匹配。一个Intent Filter中可声明多个action，此时Intent中的action与其中的任一个action在字符串形式上完全相同即可匹配成功。</p>
+<p>特殊情况：<br>如果filter中没有设置任何action 那么所有的intent匹配都会失败<br>如果action只和category组合使用（隐式调用的条件），intent中不指定action，那么无法启动目标组件<br>如果action和category、data组合使用，intent中不指定action但是filter中至少存在一个action 那么是可以匹配成功的</p>
+<h4 id="category的匹配规则："><a href="#category的匹配规则：" class="headerlink" title="category的匹配规则："></a>category的匹配规则：</h4><p>Intent-filter可定义零到多个category标签intent中的定义的每一个category都需要匹配上intent-filter中的category标签，反之不成立（intent-filter中的category标签可能比intent中的定义的category多）。所以无论intent-filter中是否定义了category标签，未添加category的intent总能匹配上该intent-filter。</p>
+<p>注意：<br>通过startActivity()或startActivityForResult()方法隐式启动的intent中，将自动被添加一个CATEGORY_DEFAULT的category，所以若您希望自己的activity能够被隐式启动，则需要在intent-filter中添加一个android.intent.category.DEFAULT的category标签。</p>
+<h4 id="data匹配规则："><a href="#data匹配规则：" class="headerlink" title="data匹配规则："></a>data匹配规则：</h4><p>intent filter可定义零到多个data标签每个data标签都能设置mimeType和URI 结构，其中URI可分成四部分：scheme, host, port 和 path。但是是有一个线性依赖：若scheme 未指定，则host被忽略；若host未指定，则port被忽略；<br>若scheme和host均未指定，则path被忽略；</p>
+<p>在intent中添加的data只需要匹配一部分intent-filter中的data：</p>
+<ul>
+<li>若filter只定义了scheme，则intent的data定义的URI中只要包含了相同的scheme，就能匹配；</li>
+<li>若filter只定义了scheme和host，则intent的data定义的URI中只要包含了相同的scheme和host，就能匹配；</li>
+<li>若filter只定义了scheme、host和port，则intent的data定义的URI中只要包含了相同的scheme、host和port，就能匹配</li>
+</ul>
+<h2 id="六、Intent源码解析"><a href="#六、Intent源码解析" class="headerlink" title="六、Intent源码解析"></a>六、Intent源码解析</h2><p>Intent的源码大约1W行其中对我们有用打大概有以下几类：</p>
+<h4 id="构造函数"><a href="#构造函数" class="headerlink" title="构造函数"></a>构造函数</h4><pre><code>public Intent() {
+}
+public Intent(String action) {
+    setAction(action);
+}
+public Intent(String action, Uri uri) {
+    setAction(action);
+    mData = uri;
+}
+</code></pre><p>Intent提供了8中构造函数供我们使用。</p>
+<h4 id="属性的set和get方法"><a href="#属性的set和get方法" class="headerlink" title="属性的set和get方法"></a>属性的set和get方法</h4><pre><code>public @Nullable Uri getData() {
+    return mData;
+}
+public @Nullable String getType() {
+    return mType;
+}
+public @NonNull Intent setData(@Nullable Uri data) {
+    mData = data;
+    mType = null;
+    return this;
+}
+public @NonNull Intent setType(@Nullable String type) {
+    mData = null;
+    mType = type;
+    return this;
+}
+public @NonNull Intent setDataAndType(@Nullable Uri data, @Nullable String type) {
+    mData = data;
+    mType = type;
+    return this;
+}
+//...</code></pre><p>此处我们看到下setData/Type，单独调用都会把对方置空，所以如果你想设置data和type需要调用setDataAndType，而不能先调用其中一个然后再调用另一个。<br>此外还有putExtra等相关函数这里就不做分析了，有兴趣的可自行查看源码。<br>最后看一个平时我们并不常用的函数toUri：</p>
+<pre><code>public String toUri(@UriFlags int flags) {
+    StringBuilder uri = new StringBuilder(128);
+    if ((flags&amp;URI_ANDROID_APP_SCHEME) != 0) {
+        if (mPackage == null) {
+            throw new IllegalArgumentException(
+                    &quot;Intent must include an explicit package name to build an android-app: &quot;
+                    + this);
+        }
+        uri.append(&quot;android-app://&quot;);
+        uri.append(mPackage);
+        String scheme = null;
+        if (mData != null) {
+            scheme = mData.getScheme();
+            if (scheme != null) {
+                uri.append(&#39;/&#39;);
+                uri.append(scheme);
+                String authority = mData.getEncodedAuthority();
+                if (authority != null) {
+                    uri.append(&#39;/&#39;);
+                    uri.append(authority);
+                    String path = mData.getEncodedPath();
+                    if (path != null) {
+                        uri.append(path);
+                    }
+                    String queryParams = mData.getEncodedQuery();
+                    if (queryParams != null) {
+                        uri.append(&#39;?&#39;);
+                        uri.append(queryParams);
+                    }
+                    String fragment = mData.getEncodedFragment();
+                    if (fragment != null) {
+                        uri.append(&#39;#&#39;);
+                        uri.append(fragment);
+                    }
+                }
+            }
+        }
+        toUriFragment(uri, null, scheme == null ? Intent.ACTION_MAIN : Intent.ACTION_VIEW,
+                mPackage, flags);
+        return uri.toString();
+    }
+    String scheme = null;
+    if (mData != null) {
+        String data = mData.toString();
+        if ((flags&amp;URI_INTENT_SCHEME) != 0) {
+            final int N = data.length();
+            for (int i=0; i&lt;N; i++) {
+                char c = data.charAt(i);
+                if ((c &gt;= &#39;a&#39; &amp;&amp; c &lt;= &#39;z&#39;) || (c &gt;= &#39;A&#39; &amp;&amp; c &lt;= &#39;Z&#39;)
+                        || c == &#39;.&#39; || c == &#39;-&#39;) {
+                    continue;
+                }
+                if (c == &#39;:&#39; &amp;&amp; i &gt; 0) {
+                    // Valid scheme.
+                    scheme = data.substring(0, i);
+                    uri.append(&quot;intent:&quot;);
+                    data = data.substring(i+1);
+                    break;
+                }
+
+                // No scheme.
+                break;
+            }
+        }
+        uri.append(data);
+
+    } else if ((flags&amp;URI_INTENT_SCHEME) != 0) {
+        uri.append(&quot;intent:&quot;);
+    }
+
+    toUriFragment(uri, scheme, Intent.ACTION_VIEW, null, flags);
+
+    return uri.toString();
+}
+</code></pre><p>它的作用是把一个Intent转化为一个Uri，转化后的Uri包含原先Intent的action, categories, type, flags, package, component, and extras等属性。同时Intent还提供了getIntent方法把Uri转换回Intent。<br>Intent转换Uri过程就是将Intent的属性值读取出来进行拼接然后序列化。不过需要注意的是它没有关于 Bundle 的参数传递，所以转换过程会把设置的bundle数据丢失。<br>利用该函数我们可以不必在调用startActivity前去new Intent而是通过getIntent把一个Uri转化为Intent然后再startActivity，这样做的好处是startActivity中传入的intent变为”可控”的。</p>
+<h2 id="七、相关问题"><a href="#七、相关问题" class="headerlink" title="七、相关问题"></a>七、相关问题</h2><h3 id="path、pathPrefix、pathPattern-之间的区别"><a href="#path、pathPrefix、pathPattern-之间的区别" class="headerlink" title="path、pathPrefix、pathPattern 之间的区别"></a>path、pathPrefix、pathPattern 之间的区别</h3><p>path 用来匹配完整的路径，如：<a href="http://example.com/blog/abc.html，这里将" target="_blank" rel="noopener">http://example.com/blog/abc.html，这里将</a> path 设置为 /blog/abc.html 才能够进行匹配；<br>pathPrefix 用来匹配路径的开头部分，拿上来的 Uri 来说，这里将 pathPrefix 设置为 /blog 就能进行匹配了；<br>pathPattern 用表达式来匹配整个路径，这里需要说下匹配符号与转义。<br>匹配符号：<br>“” 用来匹配0次或更多，如：“a” 可以匹配“a”、“aa”、“aaa”…<br>“.” 用来匹配任意字符，如：“.” 可以匹配“a”、“b”，“c”…<br>因此 “.<em>” 就是用来匹配任意字符0次或更多，如：“.</em>html” 可以匹配 “abchtml”、“chtml”，“html”，“sdf.html”…</p>
+<h3 id="Intent传递数据的大小限制"><a href="#Intent传递数据的大小限制" class="headerlink" title="Intent传递数据的大小限制"></a>Intent传递数据的大小限制</h3><p>intent传递过大的数据会导致TransactionTooLargeException，其本质原因是intent使用binder进行数据传递。在过程中Intent 中的数据，会作为 Parcel 被存储在 Binder 的事务缓冲区(Binder transaction buffer)中的对象进行传输。但是Binder 的事务缓冲区大小为1M，并且该缓冲区是进程共享的。</p>
+<p>解决方法：<br>1、避免传递过大数据<br>2、使用 EventBus 的粘性事件来解决</p>
+<h3 id="查询是否有Activity可以匹配我们指定Intent的组件"><a href="#查询是否有Activity可以匹配我们指定Intent的组件" class="headerlink" title="查询是否有Activity可以匹配我们指定Intent的组件"></a>查询是否有Activity可以匹配我们指定Intent的组件</h3><p>在启动Activity时传入intent找不到符合条件的Activity那么程序将会崩溃，所以我们每次startActivity时最好查询下是否有Activity可以匹配我们指定Intent的组件，可以使用以下方法：</p>
+<ul>
+<li>PackageManager的resolveActivity或者Intent的resolveActivity方法会获得最适合Intent的一个Activity</li>
+<li>调用PackageManager的queryIntentActivities会返回所有成功匹配Intent的Activity</li>
+</ul>
+<h3 id="android-intent-action-MAIN-与android-intent-category-LAUNCHER、android-intent-category-HOME的区别"><a href="#android-intent-action-MAIN-与android-intent-category-LAUNCHER、android-intent-category-HOME的区别" class="headerlink" title="android.intent.action.MAIN 与android.intent.category.LAUNCHER、android.intent.category.HOME的区别"></a>android.intent.action.MAIN 与android.intent.category.LAUNCHER、android.intent.category.HOME的区别</h3><h4 id="android-intent-action-MAIN"><a href="#android-intent-action-MAIN" class="headerlink" title="android.intent.action.MAIN"></a>android.intent.action.MAIN</h4><p>应用的入口即最先启动的组件</p>
+<h4 id="android-intent-category-LAUNCHER"><a href="#android-intent-category-LAUNCHER" class="headerlink" title="android.intent.category.LAUNCHER"></a>android.intent.category.LAUNCHER</h4><p>决定是否在桌面显示图标</p>
+<h4 id="android-intent-category-HOME"><a href="#android-intent-category-HOME" class="headerlink" title="android.intent.category.HOME"></a>android.intent.category.HOME</h4><p>按住“HOME”键，该程序显示在HOME列表里</p>
+<h3 id="有多个匹配组件时如何设置每次都弹窗"><a href="#有多个匹配组件时如何设置每次都弹窗" class="headerlink" title="有多个匹配组件时如何设置每次都弹窗"></a>有多个匹配组件时如何设置每次都弹窗</h3><p>当有多个应用可以响应我们的隐式 Activity 时，系统会弹出一个选择框，让用户选择需要打开的应用，用户也可以选择记住要自己打开的应用，这样下次就不会再弹出选择框。那么假如我希望每次都弹窗，不让用户记住呢？我们可以使用 createChooser() 创建 Intent</p>
+<p> 参考文章：</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzIxNjc0ODExMA==&amp;mid=2247484812&amp;idx=1&amp;sn=14886c84cff5b1bfea5b210a7e261672&amp;chksm=97851cada0f295bbfc1b4bd970ca45988105a8e1e6ac7a498b99521b8261cfb06386b0f3d3dd&amp;scene=38#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzIxNjc0ODExMA==&amp;mid=2247484812&amp;idx=1&amp;sn=14886c84cff5b1bfea5b210a7e261672&amp;chksm=97851cada0f295bbfc1b4bd970ca45988105a8e1e6ac7a498b99521b8261cfb06386b0f3d3dd&amp;scene=38#wechat_redirect</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&amp;mid=2650235926&amp;idx=1&amp;sn=58d03be2956944647df6a9719c90d13b&amp;scene=38#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&amp;mid=2650235926&amp;idx=1&amp;sn=58d03be2956944647df6a9719c90d13b&amp;scene=38#wechat_redirect</a></li>
+<li><a href="https://blog.csdn.net/mynameishuangshuai/article/details/51673273" target="_blank" rel="noopener">https://blog.csdn.net/mynameishuangshuai/article/details/51673273</a></li>
+<li><a href="https://juejin.im/post/5db11e8051882564a061837b" target="_blank" rel="noopener">Android 基础知识5：Intent 和 Intent 过滤器 - 掘金</a></li>
+</ul>
+
+            <hr>
+          </div>
+          <br>
+          <div>
+            <div id="post-tag">
+              
+              <span>
+                <i class="iconfont icon-tag"></i>
+                
+                  <a class="hover-with-bg" href="/tags/Basics">Basics</a>
+                
+                  <a class="hover-with-bg" href="/tags/Intent">Intent</a>
+                
+              </span>
+            </div>
+            
+              <div id="post-note">
+                <div><strong>本文作者：</strong><a href="/">myname</a></div>
+                <div><strong>本文链接：</strong><a href="http://yoursite.com/2019/11/01/IntentDK/">http://yoursite.com/2019/11/01/IntentDK/</a></div>
+                <div><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</div>
+              </div>
+            
+            
+              <div id="post-nav" class="container">
+                  <div class="row">
+                    
+                      <a href="/2019/11/10/Okhttp1/" id="post-nav-prev" class="col">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="post-nav-title">Okhttp解析之—Okhttp概览</span>
+                      </a>
+                    
+                    
+                      <a href="/2019/10/22/%20ContextDK/" id="post-nav-next" class="col">
+                        <span class="post-nav-title">Context知识详解</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+            
+          </div>
+        </div>
+
+        <!-- custom -->
+        
+
+        <!-- Comments -->
+        <div class="col-lg-10 mx-auto nopadding-md">
+          <div class="container comments mx-auto" id="comments">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;ディレクトリ</p>
+    <div id="tocbot"></div>
+  </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+  </main>
+  
+<div id="sidebar" class="sidebar-hide">
+  <span class="sidebar-button sidebar-button-shift" id="toggle-sidebar" >
+    <i class="fa fa-arrow-right on" aria-hidden="true"></i>
+  </span>
+  <div class="sidebar-overlay"></div>
+  <div class="sidebar-intrude">
+    <div class="sidebar-avatar">
+      <img src="/img/favicon.png" srcset="/img/favicon.png" alt="avatar"/>
+    </div>
+    <div class="text-center sidebar-about">
+      <p class="h3 sidebar-author">Robin</p>
+      <p class="sidebar-subtitle"></p>
+      
+        <a href="https://github.com" class="h4" target="_blank">
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="https://twitter.com" class="h4" target="_blank">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="mailto:example@example.com" class="h4" target="_blank">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+    </div>
+    <div class="sidebar-friend">
+      <p class="h6 sidebar-friend-title">
+        <span class="sidebar-label-left"><i class="fas fa-user-friends"></i></span>
+        <span class="sidebar-label">友情链接</span>
+      </p>
+      <ul class="list-group">
+        
+          <a href="https://example.com/" target="_blank">
+            <li class="list-group-item">
+              <i class="fas fa-quote-left"></i>&nbsp;
+              friendname
+            </li>
+          </a>
+        
+    </ul>
+    </div>
+  </div>
+</div>
+
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">検索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">キーワード</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <div id="footerContent"  class="rgba-black-slight">
+<footer class="pt-5">
+  <div class="text-center py-3">
+  
+
+    
+      <div class="footer-copyright">
+        
+          ©2020&nbsp;robin
+        
+        
+          
+            <i class="iconfont icon-love"></i>
+          
+          <span>运转了<span id="runtime"></span>天</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+    
+  </div>
+</footer>
+</div>
+<!-- SCRIPTS -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js" ></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
+<script src="https://cdn.staticfile.org/mdbootstrap/4.8.9/js/mdb.min.js" ></script>
+<script src="/js/main.js" ></script>
+
+  <script src="/js/lazyload.js" ></script>
+
+
+  
+    <script src="https://cdn.staticfile.org/tocbot/4.8.0/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
+<!-- Plugins -->
+
+  <script src="https://cdn.staticfile.org/prettify/r298/prettify.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/typed.js/2.0.10/typed.min.js" ></script>
+  <script type="text/javascript">
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Intent知识详解&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/anchor-js/4.2.0/anchor.min.js" ></script>
+  <script type="text/javascript">
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+  <script src="/js/local-search.js" ></script>
+  <script type="text/javascript">
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script type="text/javascript">
+  /* Fancybox */
+  var setupFancybox = function () {
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(function() {
+    var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      $(this).wrap(element);
+    });
+  };
+  setupFancybox();
+  </script>
+
+
+
+
+  <!-- 首页文章列表随机图片 -->
+  <script type="text/javascript">
+    $("img.image_random").each(function(){
+      
+        var xjhUrl = "//img.xjh.me/random_img.php?return=json";
+      
+      var _this = $(this);
+      $.get(xjhUrl,function(data,status){
+        if(status === "success"){
+          if(data.result === 200){
+            _this[0].src = data.img;
+          }
+        }
+      });
+    });
+  </script>
+
+
+
+
+  <script async src="//cdn.jsdelivr.net/npm/busuanzi@2.3.0/bsz.pure.mini.js" ></script>
+  
+
+
+  
+  
+    <script type="text/javascript">
+      //定义获取词语下标
+      var a_idx = 0;
+      jQuery(document).ready(function ($) {
+        //点击body时触发事件
+        $("body").click(function (e) {
+          //需要显示的词语
+          var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+          //设置词语给span标签
+          var $i = $("<span/>").text(a[a_idx]);
+          //下标等于原来下标+1  余 词语总数
+          a_idx = (a_idx + 1) % a.length;
+          //获取鼠标指针的位置，分别相对于文档的左和右边缘。
+          //获取x和y的指针坐标
+          var x = e.pageX, y = e.pageY;
+          //在鼠标的指针的位置给$i定义的span标签添加css样式
+          $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": rand_color()
+          });
+          // 随机颜色
+          function rand_color() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+          }
+          //在body添加这个标签
+          $("body").append($i);
+          //animate() 方法执行 CSS 属性集的自定义动画。
+          //该方法通过CSS样式将元素从一个状态改变为另一个状态。CSS属性值是逐渐改变的，这样就可以创建动画效果。
+          //详情请看http://www.w3school.com.cn/jquery/effect_animate.asp
+          $i.animate({
+            //将原来的位置向上移动180
+            "top": y - 180,
+            "opacity": 0
+            //1500动画的速度
+          }, 1500, function () {
+            //时间到了自动删除
+            $i.remove();
+          });
+        });
+      })
+      ;
+    </script>
+  
+
+
+<!-- Functions -->
+<script type="text/javascript">
+  /* 切换背景 */
+  
+    $("body").removeClass("banner-bg");
+    $("#background").addClass("banner-bg");
+    $('#mainContent').removeClass("rgba-black-slight");
+    $('#footerContent').removeClass("rgba-black-slight");
+    if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) || (/Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent))) {
+      $("#background").css("background-attachment", "scroll");
+    }
+  
+</script>
+
+  <script type="text/javascript">
+    /*显示博客运行时间*/
+    var blogRunTime = function () {
+      var runTime = document.getElementById("runtime");
+      var runtimeDate = "2019,04,20";
+	    var createDate = new Date(runtimeDate);
+	    var nowDate = new Date();
+	    var dateLine = nowDate.getTime() - createDate.getTime();
+	    var runDate = Math.floor(dateLine / (1000 * 60 * 60 * 24));
+	    runTime.innerHTML = runDate;
+    };
+    $(document).ready(function(){
+	    blogRunTime();
+    });
+  </script>
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+  
+</body>
+</html>

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="author" content="robin">
+  
+    <meta name="description" content="Okhttp解析系列">
+  
+  
+    <meta name="keywords" content="Okhttp," />
+  
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <title>Okhttp解析之—Okhttp概览 ~ Robin</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.10.2/css/all.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.8.9/css/mdb.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css"  >
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+  <link rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css"  >
+
+
+  <link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"  >
+
+<link rel="stylesheet" href="/css/main.css"  >
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+  <style type="text/css">
+    .banner-bg {
+      
+        background-image: url('/img/default.png');
+      
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  </style>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="banner-bg">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Robin</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">主页</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/reading/">读书</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/photo/">相册</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">归档</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">标签</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+</nav>
+
+    <div class="view intro-2 rgba-black-slight" id="background">
+      <div class="full-bg-img">
+        <div class="mask flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+            
+              <br>
+              <p class="mt-3">
+                <i class="far fa-calendar-alt"></i>
+                <span class="post-date">2019-11-10&nbsp;|&nbsp;</span>
+                <i class="far fa-chart-bar"></i>
+                <span class="post-count">3.5k</span>字&nbsp;|&nbsp;
+                <i class="far fa-clock"></i>
+                <span class="post-count">13</span>分钟
+                
+                  <span id="busuanzi_container_page_pv" style="display:none">
+                    &nbsp;|&nbsp;
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv"></span>次
+                  </span>
+                
+              </p>
+            
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="rgba-black-slight">
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto" id="post">
+          <div class="markdown-body">
+            <p>Okhttp解析系列</p>
+<a id="more"></a>
+
+<h1 id="Okhttp解析—Okhttp概览"><a href="#Okhttp解析—Okhttp概览" class="headerlink" title="Okhttp解析—Okhttp概览"></a>Okhttp解析—Okhttp概览</h1><p>Okhttp作为目前Android使用最为广泛的网络框架之一，我们有必要去深入了解一下，本文是Okhttp解析的第一篇，主要是从宏观上认识Okhttp整个架构是如何实现的。</p>
+<h2 id="一、什么是Okhttp"><a href="#一、什么是Okhttp" class="headerlink" title="一、什么是Okhttp"></a>一、什么是Okhttp</h2><p>HTTP是当今应用程序通过网络交换数据和媒体的方式。 有效地使用 HTTP 可以使应用加载得更快并节省带宽。<br>Okhttp是一个高效的HTTP Client，高效性体现在：</p>
+<ul>
+<li>Http / 2支持允许对同一主机的所有请求共享一个套接字</li>
+<li>连接池减少了请求延迟</li>
+<li>透明 GZIP 缩小了下载大小</li>
+<li>对于重复请求，响应缓存可以完全避免网络请求</li>
+</ul>
+<p>当网络出现问题时，OkHttp 不会立即结束: 它会默默地从常见的连接问题中恢复过来。 如果您的服务有多个 IP 地址，如果第一次连接失败，OkHttp 将尝试替代地址。 这对于 IPv4 + IPv6和承载于冗余数据中心的服务是必要的。 Okhttp 支持现代 TLS 特性(TLS 1.3、 ALPN、证书ping)。 它可以配置为回退到可用的连接。<br>并且Okhttp是易用的，其通过Builder模式设计请求 / 响应 API，支持同步阻塞调用和带回调的异步调用。</p>
+<h2 id="二、Okhttp的请求机制以及相关概念"><a href="#二、Okhttp的请求机制以及相关概念" class="headerlink" title="二、Okhttp的请求机制以及相关概念"></a>二、Okhttp的请求机制以及相关概念</h2><p>首先我们来了解下HTTP client、request、response。<br>HTTP client的作用就是接受我们的request并返回response。<br>request通常包含一个 URL, 一个方法 (比如GET/POST), 以及一个headers列表还可能包含一个body（特定内容类型的数据流）。<br>response则通常用响应代码(比如200表示成功，404表示未找到)、headers和可选的body来回答request。</p>
+<p>我们日常使用http都是按以下步骤：<br>1、创建httpClient<br>2、创建request<br>3、使用httpClient请求request然后获取respone</p>
+<p>使用Okhttp也是如此，我们创建OkhttpClient然后把Reques交给它，最后拿到Respone，但是Okhttp在内部实际进行http请求时并不是这样简单的拿Request去请求然后获得Resopne返回。</p>
+<p>下面就来看下Okhttp的请求机制，可以概括为以下流程：</p>
+<ol>
+<li>当我们创建OkhttpClient然后把Reques交给它之后，Okhttp为了提高正确性和效率在传输请求之前会重写请求。</li>
+<li>然后Okhttp会尝试连接webserver，我们知道request中是带有URL的但是Okhttp在连接webserver时不仅仅使用URL它还会用Address和Route。连接webserver成功后获取respone，连接webserver失败Okhttp会进行重试操作。</li>
+<li>在把respone返回给client之前Okhttp一般还会重写respone以及缓存respone。还有就是如果请求过程中产生重定向Okhttp也会进行处理并返回最终的respone。<br>上边就是Okhttp的请求以及返回的大致流程 </li>
+</ol>
+<h3 id="Rewriting-Requests"><a href="#Rewriting-Requests" class="headerlink" title="Rewriting Requests"></a>Rewriting Requests</h3><p>Okhttp 可以添加原始请求中缺少的headers，包括Content-Length,Transfer-Encoding,User-Agent ,Host ,Connection , 和Content-Type。 除非Accept-Encoding头已经存在，否则它将添加一个用于透明响应压缩的 Accept-Encoding 头。 如果你有 cookies，OkHttp 会添加一个 Cookie 头。</p>
+<p>有些请求会有一个缓存response。 当这个缓存过期，OkHttp 可以执行一个有条件的 GET 来下载新的response，这需要添加如 If-Modified-Since 和 If-None-Match 这样的headers。</p>
+<h3 id="Connections"><a href="#Connections" class="headerlink" title="Connections"></a>Connections</h3><p>Okhttp连接webserver时使用了URL、Address和Route。</p>
+<h4 id="URL"><a href="#URL" class="headerlink" title="URL"></a>URL</h4><p>Url是 HTTP 和互联网的基础，每个 URL 标识一个特定的路径。它是一个通用的，分散的网络命名方案，它指定了如何访问网络资源、指定调用是纯文本(http) 或加密(https)方式。它们没有指定是否应该使用特定的代理服务器或者如何通过该代理服务器的身份验证</p>
+<h4 id="Address"><a href="#Address" class="headerlink" title="Address"></a>Address</h4><p>Address指定一个 web 服务器(比如 github. com)和连接到该服务器所需的所有静态配置: 端口号、 HTTPS 设置和首选网络协议(比如 http / 2或 SPDY)。</p>
+<p>具有相同Address的 url 也可能有相同的底层 TCP 套接字连接。 共享一个连接有很大的性能优势比如更低的延迟，更高的吞吐量(由于 TCP 缓慢启动)和节省电池。 Okhttp 使用一个 ConnectionPool 自动重用 http / 1.x 连接以及多路传输 http / 2和 SPDY 连接。<br>在 OkHttp 中，Address的一些字段来自 URL (scheme, hostname, port) ，其余字段来自 OkHttpClient。</p>
+<h4 id="Route"><a href="#Route" class="headerlink" title="Route"></a>Route</h4><p>Route提供实际连接到网络服务器所需的动态信息。 它会尝试的特定 IP 地址(由 DNS 查询发现)、使用的准确代理服务器(如果使用 ProxySelector)以及协商的 TLS 版本(用于 HTTPS 连接)。<br>一个地址可能有多条Route。 例如，承载于多个数据中心的 web 服务器在其 DNS 响应中可能会产生多个 IP 地址。</p>
+<p>当你使用 OkHttp 请求一个 URL 时，它是这样做的:</p>
+<ol>
+<li>它使用 URL 并配置 OkHttpClient 来创建一个address。 这个address指定了我们如何连接到网络服务器</li>
+<li>它试图从连接池（connection pool）中检索具有该地址的连接</li>
+<li>如果它没有在连接池中找到连接，它会选择一条route进行尝试。 这通常意味着发出 DNS 请求来获取服务器的 IP 地址。 然后，如果有需要，它会选择一个 TLS 版本和代理服务器</li>
+<li>如果是一个新的route，则通过构建直接的套接字连接、 TLS 隧道(通过 HTTP 代理使用 HTTPS)或直接的 TLS 连接进行连接。 必要时，它会进行 TLS 握手</li>
+<li>发送 HTTP 请求并读取respone</li>
+</ol>
+<p>如果连接有问题，OkHttp 会选择另一条route，再试一次。 这让 OkHttp 在服务器地址的一个子集无法访问时从错误中恢复。 当池连接过时或者不支持当前使用的 TLS 版本时，它也很有用。<br>一旦接收到respone，连接将返回到池中，以便可以在将来的请求中重用它。 连接在一段时间的不活动会被从连接池中清除。</p>
+<h3 id="Rewriting-Response"><a href="#Rewriting-Response" class="headerlink" title="Rewriting Response"></a>Rewriting Response</h3><p>如果使用透明压缩，OkHttp 将删除相应的 Content-Encoding 和 Content-Length，因为它们不适用于解压缩的响应体。<br>如果条件 GET请求 成功，来自网络和缓存的respone将按照规范的指示进行合并。</p>
+<h3 id="Follow-up-Requests"><a href="#Follow-up-Requests" class="headerlink" title="Follow-up Requests"></a>Follow-up Requests</h3><p>当你请求的 URL 被重定向，webserver 将返回一个响应代码，比如302来指示新 URL。Okhttp将会重定向检索最终的respone。<br>如果respone发出了一个授权验证，OkHttp 将要求 Authenticator (如果配置了一个)满足这个验证。 如果身份验证者提供了凭据，那么request会携带该凭据去重试。</p>
+<h3 id="Retrying-Requests"><a href="#Retrying-Requests" class="headerlink" title="Retrying Requests"></a>Retrying Requests</h3><p>有时候连接会失败（比如池连接过时并断开连接或无法连接到网络服务器本身）如果此时有一个可用的Route，OkHttp 会用该Route重试请求。</p>
+<p>Okhttp在实现流程的时候还引入了一些概念比如Call、Interceptors、ConnectionSpec、Events等等。</p>
+<h3 id="Call"><a href="#Call" class="headerlink" title="Call"></a>Call</h3><p>经过重写、重定向、重试等操作，简单请求可能会产生许多请求和响应。 Okhttp 使用 Call 来封装表示request，Call就是一个已经准备好可以执行的请求。如果 url 被重定向，或者故障转移到另一个 IP 地址，那么代码将继续工作，直至返回最终respone。</p>
+<p>Call有两种调用方式：<br>同步：线程阻塞直到响应可读为止<br>异步: 可以在任何线程上对请求进行排队，当响应可读时在另一个线程上被调回<br>可以从任何线程取消Call调用， 这将导致调用失败。在写入请求body或读取响应body时调用cancel会抛出IOException。</p>
+<h3 id="dispatcher"><a href="#dispatcher" class="headerlink" title="dispatcher"></a>dispatcher</h3><p>Dispatcher调度器，它实际就是负责Okhttp请求策略。<br>对于同步调用，调用请求的线程自己负责管理同时发出的请求数量。但是要注意的是太多的并发请求会浪费资源; 太少也不好。<br> 对于异步调用，Dispatcher 实现最大并发请求的策略。 它设置了每个 web 服务器的最大值并发请求数为5，总并发数为64。当然我们也可以自行设置并发数。</p>
+<h3 id="Interceptors"><a href="#Interceptors" class="headerlink" title="Interceptors"></a>Interceptors</h3><p>拦截器可以说是Okhttp的精髓之一，它是一种强大的机制，它可以监测、重写和重试Call调用。系统提供了5种已经定义好的拦截器，上面说的request/respone 重写，失败重试等都是在拦截器中完成的。<br>对 chain.proceed (request)的调用是每个拦截器实现的关键部分。 这个简单的外观方法是所有拦截器完成其功能的地方，并且还生成满足请求的响应。 注意如果 chain.proceed (request)被调用多次，则必须关闭以前的响应body。<br>实际使用过程是通过拦截器链把拦截器链起来然后按顺序调用拦截器。<br><img src="https://square.github.io/okhttp/images/interceptors@2x.png" srcset="/img/loading.gif" alt="interceptor"></p>
+<p>Okhttp拦截器分为2类：Application Interceptors和Network Interceptors。</p>
+<p>这两类拦截器本质上没有区别只是它们作用的时机不同。由上图我们可以看出Application Interceptors作用于Okhttp Core之前而Network Interceptors则作用于Okhttp Core之后。我的理解就是Application Interceptors调用是在请求发出之前，Network Interceptors则是在请求发出后与webserver连接的过程。<br>每种拦截器链都有其优点：<br><strong>Application interceptors</strong></p>
+<ul>
+<li><p>不必担心重定向和重试之类的中间响应</p>
+</li>
+<li><p>总是调用一次，即使 HTTP 响应是从缓存中提供的</p>
+</li>
+<li><p>关注应用程序的原始意图，而不关注OkHttp注入的headers</p>
+</li>
+<li><p>允许短路和不调用Chain.proceed().</p>
+</li>
+<li><p>允许重试并多次调用Chain.proceed().</p>
+</li>
+<li><p><em>Network Interceptors*</em></p>
+</li>
+<li><p>能够操作中间respone，如重定向和重试</p>
+</li>
+<li><p>不会为短路网络的缓存响应调用</p>
+</li>
+<li><p>仅当数据将要通过网络传输时才会关注</p>
+</li>
+<li><p>允许带有Connection请求<br>最后补充两个示例：<br>使用Interceptor重写请求</p>
+<pre><code>/** This interceptor compresses the HTTP request body. Many webservers can&#39;t handle this! */
+final class GzipRequestInterceptor implements Interceptor {
+@Override public Response intercept(Interceptor.Chain chain) throws IOException {
+  Request originalRequest = chain.request();
+  if (originalRequest.body() == null || originalRequest.header(&quot;Content-Encoding&quot;) != null) {
+    return chain.proceed(originalRequest);
+  }
+
+  Request compressedRequest = originalRequest.newBuilder()
+      .header(&quot;Content-Encoding&quot;, &quot;gzip&quot;)
+      .method(originalRequest.method(), gzip(originalRequest.body()))
+      .build();
+  return chain.proceed(compressedRequest);
+}
+
+private RequestBody gzip(final RequestBody body) {
+  return new RequestBody() {
+    @Override public MediaType contentType() {
+      return body.contentType();
+    }
+
+    @Override public long contentLength() {
+      return -1; // We don&#39;t know the compressed length in advance!
+    }
+
+    @Override public void writeTo(BufferedSink sink) throws IOException {
+      BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
+      body.writeTo(gzipSink);
+      gzipSink.close();
+    }
+  };
+}
+}
+</code></pre></li>
+</ul>
+<pre><code>
+使用Interceptor重写响应</code></pre><p>/** Dangerous interceptor that rewrites the server’s cache-control header. */<br>private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interceptor() {<br>  @Override public Response intercept(Interceptor.Chain chain) throws IOException {<br>    Response originalResponse = chain.proceed(chain.request());<br>    return originalResponse.newBuilder()<br>        .header(“Cache-Control”, “max-age=60”)<br>        .build();<br>  }<br>};</p>
+<pre><code>
+### ConnectionSpec
+ConnectionSpec的引入是为了HTTPS，在协商与 HTTPS 服务器的连接时，OkHttp 需要知道要提供哪些 TLS 版本和密码套件。Okhttp为了与尽可能多的主机连接的同时保证连接的安全性引入ConnectionSpec，它实现了特定的安全性和连接性决策，Okhttp 包括四个内置的连接规范RESTRICTED_TLS、MODERN_TLS、COMPATIBLE_TLS、CLEARTEXT。
+默认情况下，OkHttp 将尝试建立一个 MODERN_TLS 连接。 但是，通过配置client的 connectionSpecs，如果 MODERN_TLS失败，回退到 COMPATIBLE_TLS 连接。</code></pre><p>OkHttpClient client = new OkHttpClient.Builder()<br>    .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))<br>    .build();</p>
+<pre><code>### Events
+Events的引入是为了监控call请求，因为我们有必要了解我们应用的HTTP请求。具体来说就是监控以下内容：
+应用程序 HTTP 请求调用的频率和请求大小。 
+基础网络的性能监控，如果网络差你应该减少请求或者改善网络。
+
+#### **EventListener**
+Okhttp提供了EventListener，我们可以继承它并重写我们感兴趣的方法来进行Event的监控。
+![Evnets](https://square.github.io/okhttp/images/events@2x.png)
+上图是在没有重试和重定向的情况下EventListener所能监控的Events流。下面是对应的代码</code></pre><p>class PrintingEventListener extends EventListener {<br>  private long callStartNanos;</p>
+<p>  private void printEvent(String name) {<br>    long nowNanos = System.nanoTime();<br>    if (name.equals(“callStart”)) {<br>      callStartNanos = nowNanos;<br>    }<br>    long elapsedNanos = nowNanos - callStartNanos;<br>    System.out.printf(“%.3f %s%n”, elapsedNanos / 1000000000d, name);<br>  }</p>
+<p>  @Override public void callStart(Call call) {<br>    printEvent(“callStart”);<br>  }</p>
+<p>  @Override public void callEnd(Call call) {<br>    printEvent(“callEnd”);<br>  }</p>
+<p>  @Override public void dnsStart(Call call, String domainName) {<br>    printEvent(“dnsStart”);<br>  }</p>
+<p>  @Override public void dnsEnd(Call call, String domainName, List<InetAddress> inetAddressList) {<br>    printEvent(“dnsEnd”);<br>  }</p>
+<p>  …<br>}</p>
+<pre><code>
+#### **Eventlistener. Factory**
+上面Eventlistener只适用于没有并发的情况，如果有多个请求并发执行我们需要使用Eventlistener. Factory来给每个请求创建一个Eventlistener。
+
+下面是一个给每个请求创建一个带唯一ID的Eventlistener的示例：</code></pre><p>class PrintingEventListener extends EventListener {<br>  public static final Factory FACTORY = new Factory() {<br>    final AtomicLong nextCallId = new AtomicLong(1L);</p>
+<pre><code>@Override public EventListener create(Call call) {
+  long callId = nextCallId.getAndIncrement();
+  System.out.printf(&quot;%04d %s%n&quot;, callId, call.request().url());
+  return new PrintingEventListener(callId, System.nanoTime());
+}</code></pre><p>  };</p>
+<p>  final long callId;<br>  final long callStartNanos;</p>
+<p>  public PrintingEventListener(long callId, long callStartNanos) {<br>    this.callId = callId;<br>    this.callStartNanos = callStartNanos;<br>  }</p>
+<p>  private void printEvent(String name) {<br>    long elapsedNanos = System.nanoTime() - callStartNanos;<br>    System.out.printf(“%04d %.3f %s%n”, callId, elapsedNanos / 1000000000d, name);<br>  }</p>
+<p>  @Override public void callStart(Call call) {<br>    printEvent(“callStart”);<br>  }</p>
+<p>  @Override public void callEnd(Call call) {<br>    printEvent(“callEnd”);<br>  }</p>
+<p>  …<br>}</p>
+<pre><code>
+上面说的都是请求正常时event，接下来说下非正常情况下的event流程。
+#### **Events with Failures**
+当请求失败时，将调用一个失败方法 connectFailed () ，用于在建立到服务器的连接时发生故障，当 HTTP 请求永久失败时调用 callFailed ()。 当发生故障时，有可能开始事件没有相应的结束事件。
+![event](https://square.github.io/okhttp/images/events_with_failures@2x.png)
+#### **Events with Retries and Follow-Ups**
+Okhttp是健壮的，可以从一些连接故障中自动恢复。 在这种情况下，connectFailed ()事件不是终结符，后面不跟 callFailed ()。 当尝试重试时，事件侦听器将收到多个相同类型的事件。
+单个 HTTP 调用可能需要发出后续请求来处理身份验证、重定向和 HTTP 层超时。 在这种情况下，可以尝试多个连接、请求和响应。 重定向是单个请求可能触发同一类型多个事件的另一个原因。
+![event](https://square.github.io/okhttp/images/events_with_failures_and_retries@2x.png)
+
+以上就是本文全部内容，接下来就是源码分析了，不过建议在看源码前把Okhttp的整个运行过程以及其中涉及的概念搞懂这样看源码才会事半功倍。</code></pre>
+            <hr>
+          </div>
+          <br>
+          <div>
+            <div id="post-tag">
+              
+              <span>
+                <i class="iconfont icon-tag"></i>
+                
+                  <a class="hover-with-bg" href="/tags/Okhttp">Okhttp</a>
+                
+              </span>
+            </div>
+            
+              <div id="post-note">
+                <div><strong>本文作者：</strong><a href="/">myname</a></div>
+                <div><strong>本文链接：</strong><a href="http://yoursite.com/2019/11/10/Okhttp1/">http://yoursite.com/2019/11/10/Okhttp1/</a></div>
+                <div><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</div>
+              </div>
+            
+            
+              <div id="post-nav" class="container">
+                  <div class="row">
+                    
+                      <a href="/2019/11/12/Okhttp2/" id="post-nav-prev" class="col">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="post-nav-title">Okhttp解析之--基本使用流程分析</span>
+                      </a>
+                    
+                    
+                      <a href="/2019/11/01/IntentDK/" id="post-nav-next" class="col">
+                        <span class="post-nav-title">Intent知识详解</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+            
+          </div>
+        </div>
+
+        <!-- custom -->
+        
+
+        <!-- Comments -->
+        <div class="col-lg-10 mx-auto nopadding-md">
+          <div class="container comments mx-auto" id="comments">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;ディレクトリ</p>
+    <div id="tocbot"></div>
+  </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+  </main>
+  
+<div id="sidebar" class="sidebar-hide">
+  <span class="sidebar-button sidebar-button-shift" id="toggle-sidebar" >
+    <i class="fa fa-arrow-right on" aria-hidden="true"></i>
+  </span>
+  <div class="sidebar-overlay"></div>
+  <div class="sidebar-intrude">
+    <div class="sidebar-avatar">
+      <img src="/img/favicon.png" srcset="/img/favicon.png" alt="avatar"/>
+    </div>
+    <div class="text-center sidebar-about">
+      <p class="h3 sidebar-author">Robin</p>
+      <p class="sidebar-subtitle"></p>
+      
+        <a href="https://github.com" class="h4" target="_blank">
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="https://twitter.com" class="h4" target="_blank">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="mailto:example@example.com" class="h4" target="_blank">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+    </div>
+    <div class="sidebar-friend">
+      <p class="h6 sidebar-friend-title">
+        <span class="sidebar-label-left"><i class="fas fa-user-friends"></i></span>
+        <span class="sidebar-label">友情链接</span>
+      </p>
+      <ul class="list-group">
+        
+          <a href="https://example.com/" target="_blank">
+            <li class="list-group-item">
+              <i class="fas fa-quote-left"></i>&nbsp;
+              friendname
+            </li>
+          </a>
+        
+    </ul>
+    </div>
+  </div>
+</div>
+
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">検索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">キーワード</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <div id="footerContent"  class="rgba-black-slight">
+<footer class="pt-5">
+  <div class="text-center py-3">
+  
+
+    
+      <div class="footer-copyright">
+        
+          ©2020&nbsp;robin
+        
+        
+          
+            <i class="iconfont icon-love"></i>
+          
+          <span>运转了<span id="runtime"></span>天</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+    
+  </div>
+</footer>
+</div>
+<!-- SCRIPTS -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js" ></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
+<script src="https://cdn.staticfile.org/mdbootstrap/4.8.9/js/mdb.min.js" ></script>
+<script src="/js/main.js" ></script>
+
+  <script src="/js/lazyload.js" ></script>
+
+
+  
+    <script src="https://cdn.staticfile.org/tocbot/4.8.0/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
+<!-- Plugins -->
+
+  <script src="https://cdn.staticfile.org/prettify/r298/prettify.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/typed.js/2.0.10/typed.min.js" ></script>
+  <script type="text/javascript">
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Okhttp解析之—Okhttp概览&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/anchor-js/4.2.0/anchor.min.js" ></script>
+  <script type="text/javascript">
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+  <script src="/js/local-search.js" ></script>
+  <script type="text/javascript">
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script type="text/javascript">
+  /* Fancybox */
+  var setupFancybox = function () {
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(function() {
+    var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      $(this).wrap(element);
+    });
+  };
+  setupFancybox();
+  </script>
+
+
+
+
+  <!-- 首页文章列表随机图片 -->
+  <script type="text/javascript">
+    $("img.image_random").each(function(){
+      
+        var xjhUrl = "//img.xjh.me/random_img.php?return=json";
+      
+      var _this = $(this);
+      $.get(xjhUrl,function(data,status){
+        if(status === "success"){
+          if(data.result === 200){
+            _this[0].src = data.img;
+          }
+        }
+      });
+    });
+  </script>
+
+
+
+
+  <script async src="//cdn.jsdelivr.net/npm/busuanzi@2.3.0/bsz.pure.mini.js" ></script>
+  
+
+
+  
+  
+    <script type="text/javascript">
+      //定义获取词语下标
+      var a_idx = 0;
+      jQuery(document).ready(function ($) {
+        //点击body时触发事件
+        $("body").click(function (e) {
+          //需要显示的词语
+          var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+          //设置词语给span标签
+          var $i = $("<span/>").text(a[a_idx]);
+          //下标等于原来下标+1  余 词语总数
+          a_idx = (a_idx + 1) % a.length;
+          //获取鼠标指针的位置，分别相对于文档的左和右边缘。
+          //获取x和y的指针坐标
+          var x = e.pageX, y = e.pageY;
+          //在鼠标的指针的位置给$i定义的span标签添加css样式
+          $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": rand_color()
+          });
+          // 随机颜色
+          function rand_color() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+          }
+          //在body添加这个标签
+          $("body").append($i);
+          //animate() 方法执行 CSS 属性集的自定义动画。
+          //该方法通过CSS样式将元素从一个状态改变为另一个状态。CSS属性值是逐渐改变的，这样就可以创建动画效果。
+          //详情请看http://www.w3school.com.cn/jquery/effect_animate.asp
+          $i.animate({
+            //将原来的位置向上移动180
+            "top": y - 180,
+            "opacity": 0
+            //1500动画的速度
+          }, 1500, function () {
+            //时间到了自动删除
+            $i.remove();
+          });
+        });
+      })
+      ;
+    </script>
+  
+
+
+<!-- Functions -->
+<script type="text/javascript">
+  /* 切换背景 */
+  
+    $("body").removeClass("banner-bg");
+    $("#background").addClass("banner-bg");
+    $('#mainContent').removeClass("rgba-black-slight");
+    $('#footerContent').removeClass("rgba-black-slight");
+    if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) || (/Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent))) {
+      $("#background").css("background-attachment", "scroll");
+    }
+  
+</script>
+
+  <script type="text/javascript">
+    /*显示博客运行时间*/
+    var blogRunTime = function () {
+      var runTime = document.getElementById("runtime");
+      var runtimeDate = "2019,04,20";
+	    var createDate = new Date(runtimeDate);
+	    var nowDate = new Date();
+	    var dateLine = nowDate.getTime() - createDate.getTime();
+	    var runDate = Math.floor(dateLine / (1000 * 60 * 60 * 24));
+	    runTime.innerHTML = runDate;
+    };
+    $(document).ready(function(){
+	    blogRunTime();
+    });
+  </script>
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+  
+</body>
+</html>

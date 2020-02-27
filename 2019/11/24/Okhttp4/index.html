@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="author" content="robin">
+  
+    <meta name="description" content="Okhttp解析系列">
+  
+  
+    <meta name="keywords" content="Okhttp," />
+  
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <title>Okhttp解析之—okhttp缓存机制 ~ Robin</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.10.2/css/all.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.8.9/css/mdb.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css"  >
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+  <link rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css"  >
+
+
+  <link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"  >
+
+<link rel="stylesheet" href="/css/main.css"  >
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+  <style type="text/css">
+    .banner-bg {
+      
+        background-image: url('/img/default.png');
+      
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  </style>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="banner-bg">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Robin</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">主页</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/reading/">读书</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/photo/">相册</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">归档</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">标签</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+</nav>
+
+    <div class="view intro-2 rgba-black-slight" id="background">
+      <div class="full-bg-img">
+        <div class="mask flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+            
+              <br>
+              <p class="mt-3">
+                <i class="far fa-calendar-alt"></i>
+                <span class="post-date">2019-11-24&nbsp;|&nbsp;</span>
+                <i class="far fa-chart-bar"></i>
+                <span class="post-count">4.8k</span>字&nbsp;|&nbsp;
+                <i class="far fa-clock"></i>
+                <span class="post-count">21</span>分钟
+                
+                  <span id="busuanzi_container_page_pv" style="display:none">
+                    &nbsp;|&nbsp;
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv"></span>次
+                  </span>
+                
+              </p>
+            
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="rgba-black-slight">
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto" id="post">
+          <div class="markdown-body">
+            <p>Okhttp解析系列</p>
+<a id="more"></a>
+
+<h1 id="Okhttp源码解析—okhttp缓存机制"><a href="#Okhttp源码解析—okhttp缓存机制" class="headerlink" title="Okhttp源码解析—okhttp缓存机制"></a>Okhttp源码解析—okhttp缓存机制</h1><p>本文主要介绍Http的缓存相关知识并分析okhttp缓存机制是如何实现的。</p>
+<h2 id="Http的缓存相关知识"><a href="#Http的缓存相关知识" class="headerlink" title="Http的缓存相关知识"></a>Http的缓存相关知识</h2><p>缓存对移动端来说是一个很重要的功能，缓存可以提高用户体验，因为缓存可以减少请求服务端的次数而使用本地的“副本”，提高了响应速度。Http作为移动端常用的请求协议它定义了相关的缓存机制，下面一起来看下。</p>
+<h3 id="缓存分类"><a href="#缓存分类" class="headerlink" title="缓存分类"></a>缓存分类</h3><h4 id="分类一"><a href="#分类一" class="headerlink" title="分类一"></a>分类一</h4><ul>
+<li>服务端缓存</li>
+<li>客户端缓存</li>
+</ul>
+<h4 id="分类二"><a href="#分类二" class="headerlink" title="分类二"></a>分类二</h4><ul>
+<li>强制缓存：强制缓存如果命中，则不再和服务器交互了直接返回缓存，只有未命中的情况才会向服务器请求</li>
+<li>对比缓存：对比缓存会先获取缓存数据的标识并向服务端确认缓存是否有效，有效则使用缓存，无效则服务端返回最新的数据客户端收到后更新缓存。<br>两者区别是对比缓存机制无论缓存是否有效都会跟服务端进行通信，而强制缓存只要当前缓存还有效则无需跟服务端通信。</li>
+</ul>
+<h3 id="Http中的缓存设置"><a href="#Http中的缓存设置" class="headerlink" title="Http中的缓存设置"></a>Http中的缓存设置</h3><p>Http定义的缓存规则基本都是在header中设置的。</p>
+<ul>
+<li><p>Expires：Expires是Web服务器响应消息头字段，在响应http请求时告诉浏览器在过期时间前浏览器可以直接从浏览器缓存取数据，而无需再次请求。不过Expires 是HTTP 1.0的东西，现在默认浏览器均默认使用HTTP 1.1，所以它的作用基本忽略。Expires 的一个缺点就是，返回的到期时间是服务器端的时间，这样存在一个问题，如果客户端的时间与服务器的时间相差很大（比如时钟不同步，或者跨时区），那么误差就很大，所以在HTTP 1.1版开始，使用Cache-Control: max-age=秒替代。</p>
+</li>
+<li><p>Cache-control（重点关注）：Cache-Control与Expires的作用一致，都是指明当前资源的有效期，控制浏览器是否直接从浏览器缓存取数据还是重新发请求到服务器取数据。只不过Cache-Control的选择更多，设置更细致，如果同时设置的话，其优先级高于Expires。</p>
+</li>
+<li><p><em>Cache-Control常见取值以及其含义：*</em><br>```</p>
+</li>
+<li><p>Public指示响应可被任何缓存区缓存。</p>
+</li>
+<li><p>Private指示对于单个用户的整个或部分响应消息，不能被共享缓存处理。这允许服务器仅仅描述当用户的部分响应消息，此响应消息对于其他用户的请求无效。</p>
+</li>
+<li><p>No-cache指示请求或响应消息不能缓存，该选项并不是说可以设置”不缓存“，容易望文生义~</p>
+</li>
+<li><p>No-store用于防止重要的信息被无意的发布。在请求消息中发送将使得请求和响应消息都不使用缓存，完全不存下來。</p>
+</li>
+<li><p>Max-age指示客户机可以接收生存期不大于指定时间（以秒为单位）的响应。</p>
+</li>
+<li><p>Min-fresh指示客户机可以接收响应时间小于当前时间加上指定时间的响应。</p>
+</li>
+<li><p>Max-stale指示客户机可以接收超出超时期间的响应消息。如果指定max-stale消息的值，那么客户机可以接收超出超时期指定值之内的响应消息。</p>
+<pre><code></code></pre></li>
+<li><p>Last-Modified/If-Modified-Since：Last-Modified/If-Modified-Since要配合Cache-Control使用。</p>
+<pre><code>Last-Modified：标示这个响应资源的最后修改时间。web服务器在响应请求时，告诉浏览器资源的最后修改时间。
+If-Modified-Since：当资源过期时（使用Cache-Control标识的max-age），发现资源具有Last-Modified声明，则再次向web服务器请求时带上头If-Modified-Since，表示请求时间。web服务器收到请求后发现有头If-Modified-Since则与被请求资源的最后修改时间进行比对。若最后修改时间较新，说明资源又被改动过，则响应整片资源内容（写在响应消息包体内），HTTP200；若最后修改时间较旧，说明资源无新修改，则响应HTTP304(无需包体，节省浏览)，告知浏览器继续使用所保存的cache。</code></pre></li>
+<li><p>Etag/If-None-Match：Etag/If-None-Match也要配合Cache-Control使用。</p>
+<pre><code>Etag：web服务器响应请求时，告诉浏览器当前资源在服务器的唯一标识（生成规则由服务器决定）。Apache中，ETag的值，默认是对文件的索引节（INode），大小（Size）和最后修改时间（MTime）进行Hash后得到的。
+If-None-Match：当资源过期时（使用Cache-Control标识的max-age），发现资源具有Etage声明，则再次向web服务器请求时带上头If-None-Match（Etag的值）。web服务器收到请求后发现有头If-None-Match则与被请求资源的相应校验串进行比对，决定返回200或304。</code></pre></li>
+</ul>
+<p>可以看出Etag和Last-Modified作用类似那为什么要定义两个重复的字段呢？<br>因为Last-Modified有一些难以解决的问题：<br>Last-Modified标注的最后修改只能精确到秒级，如果某些文件在1秒钟以内，被修改多次的话，它将不能准确标注文件的修改时间。</p>
+<p>如果某些文件会被定期生成，当有时内容并没有任何变化，但Last-Modified却改变了，导致文件没法使用缓存。</p>
+<p>还有就是有可能存在服务器没有准确获取文件修改时间，或者与代理服务器时间不一致等情形。<br>以上问题可以通过Etag来解决，Etag是服务器自动生成或者由开发者生成的对应资源在服务器端的唯一标识符，能够更加准确的控制缓存。Last-Modified与ETag一起使用时，服务器会优先验证ETag。</p>
+<h2 id="Okhttp缓存机制"><a href="#Okhttp缓存机制" class="headerlink" title="Okhttp缓存机制"></a>Okhttp缓存机制</h2><p>Okhttp中跟缓存相关的类有CacheControl、CacheStrategy、Cache依次来看下。</p>
+<h3 id="CacheControl"><a href="#CacheControl" class="headerlink" title="CacheControl"></a>CacheControl</h3><p>CacheControl对应的是Http中的Cache-control。</p>
+<pre><code>public final class CacheControl {
+  /**
+   * Cache control request directives that require network validation of responses. Note that such
+   * requests may be assisted by the cache via conditional GET requests.
+   */
+  public static final CacheControl FORCE_NETWORK = new Builder().noCache().build();//Okhttp提供的强制使用网络的CacheControl
+
+  /**
+   * Cache control request directives that uses the cache only, even if the cached response is
+   * stale. If the response isn&#39;t available in the cache or requires server validation, the call
+   * will fail with a {@code 504 Unsatisfiable Request}.
+   */
+  public static final CacheControl FORCE_CACHE = new Builder()
+      .onlyIfCached()
+      .maxStale(Integer.MAX_VALUE, TimeUnit.SECONDS)
+      .build();//Okhttp提供的强制使用Cache的CacheControl
+
+private final boolean noCache; //对应 HTTP 控制缓存指令的 “no-cache”
+private final boolean noStore; //对应 HTTP 控制缓存指令的 “no-store”
+private final int maxAgeSeconds;//对应 HTTP 控制缓存指令的 “max-age”
+private final int sMaxAgeSeconds;//对应 HTTP 控制缓存指令的 “s-maxage”
+private final boolean isPrivate;//对应 HTTP 控制缓存指令的 “private”
+private final boolean isPublic;//对应 HTTP 控制缓存指令的 “public”
+private final boolean mustRevalidate;//对应 HTTP 控制缓存指令的 “must-revalidate”
+private final int maxStaleSeconds;//对应 HTTP 控制缓存指令的 “max-stale”
+private final int minFreshSeconds;//对应 HTTP 控制缓存指令的 “min-fresh”
+private final boolean onlyIfCached;//对应 HTTP 控制缓存指令的 “only-if-cached”
+private final boolean noTransform;//对应 HTTP 控制缓存指令的 “no-transform”
+private final boolean immutable;//对应 HTTP 控制缓存指令的 “immutable”
+
+  @Nullable
+  String headerValue; // Lazily computed, null if absent.
+
+  private CacheControl(boolean noCache, boolean noStore, int maxAgeSeconds, int sMaxAgeSeconds,
+      boolean isPrivate, boolean isPublic, boolean mustRevalidate, int maxStaleSeconds,
+      int minFreshSeconds, boolean onlyIfCached, boolean noTransform, boolean immutable,
+      @Nullable String headerValue) {
+    this.noCache = noCache;
+    this.noStore = noStore;
+    this.maxAgeSeconds = maxAgeSeconds;
+    this.sMaxAgeSeconds = sMaxAgeSeconds;
+    this.isPrivate = isPrivate;
+    this.isPublic = isPublic;
+    this.mustRevalidate = mustRevalidate;
+    this.maxStaleSeconds = maxStaleSeconds;
+    this.minFreshSeconds = minFreshSeconds;
+    this.onlyIfCached = onlyIfCached;
+    this.noTransform = noTransform;
+    this.immutable = immutable;
+    this.headerValue = headerValue;
+  }
+}</code></pre><p>CacheControl提供了Bulider模式来构造CacheControl实例。同时我们可以看到CacheControl很多字段跟Http的缓存字段一一对应。<br>在此解释几个含义：<br>noCache：如果出现在respone的头部，不是表示不允许对响应进行缓存，而是表示客户端需要与服务器进行再次验证，进行一个额外的GET请求得到最新的响应；如果出现request头部，则表示不使用缓存响应，即需要网络请求获取响应。<br>noStore：设置为true 则respone不会被缓存<br>maxAgeSeconds：缓存响应的最大存活时间。如果缓存未到最大存活时间，那么将不会再进行网络请求<br>sMaxAgeSeconds：共享缓存最大存活时间，需要注意跟<em>max-age</em>表示含义并不相同<br>onlyIfCached：强制使用缓存不经过网络请求（包括向服务器验证）</p>
+<p>同时CacheControl还提供的parse方法，传入一个Header，该函数会解析header中的相关字段然后封装成为一个CacheControl并返回。</p>
+<pre><code>public static CacheControl parse(Headers headers) {
+       //...省略
+       //解析相关header字段
+      if (&quot;no-cache&quot;.equalsIgnoreCase(directive)) {
+        noCache = true;
+      } else if (&quot;no-store&quot;.equalsIgnoreCase(directive)) {
+        noStore = true;
+      } else if (&quot;max-age&quot;.equalsIgnoreCase(directive)) {
+        maxAgeSeconds = HttpHeaders.parseSeconds(parameter, -1);
+      } else if (&quot;s-maxage&quot;.equalsIgnoreCase(directive)) {
+        sMaxAgeSeconds = HttpHeaders.parseSeconds(parameter, -1);
+      } else if (&quot;private&quot;.equalsIgnoreCase(directive)) {
+        isPrivate = true;
+      } else if (&quot;public&quot;.equalsIgnoreCase(directive)) {
+        isPublic = true;
+      } else if (&quot;must-revalidate&quot;.equalsIgnoreCase(directive)) {
+        mustRevalidate = true;
+      } else if (&quot;max-stale&quot;.equalsIgnoreCase(directive)) {
+        maxStaleSeconds = HttpHeaders.parseSeconds(parameter, Integer.MAX_VALUE);
+      } else if (&quot;min-fresh&quot;.equalsIgnoreCase(directive)) {
+        minFreshSeconds = HttpHeaders.parseSeconds(parameter, -1);
+      } else if (&quot;only-if-cached&quot;.equalsIgnoreCase(directive)) {
+        onlyIfCached = true;
+      } else if (&quot;no-transform&quot;.equalsIgnoreCase(directive)) {
+        noTransform = true;
+      } else if (&quot;immutable&quot;.equalsIgnoreCase(directive)) {
+        immutable = true;
+      }
+    }
+  }
+
+  if (!canUseHeaderValue) {
+    headerValue = null;
+  }
+  return new CacheControl(noCache, noStore, maxAgeSeconds, sMaxAgeSeconds, isPrivate, isPublic,
+      mustRevalidate, maxStaleSeconds, minFreshSeconds, onlyIfCached, noTransform, immutable,
+      headerValue);//将解析好的Header封装为一个 CacheControl并返回
+}</code></pre><h3 id="CacheStrategy"><a href="#CacheStrategy" class="headerlink" title="CacheStrategy"></a>CacheStrategy</h3><p> CacheStrategy是Okhttp提供的一个缓存策略类，它决定了是使用网络还是缓存或者两者都用。</p>
+<pre><code>public final class CacheStrategy {
+  /** The request to send on the network, or null if this call doesn&#39;t use the network. */
+  public final @Nullable
+  Request networkRequest;
+
+  /** The cached response to return or validate; or null if this call doesn&#39;t use a cache. */
+  public final @Nullable Response cacheResponse;
+
+  CacheStrategy(Request networkRequest, Response cacheResponse) {
+    this.networkRequest = networkRequest;
+    this.cacheResponse = cacheResponse;
+  }
+
+  /** Returns true if {@code response} can be stored to later serve another request. */
+  public static boolean isCacheable(Response response, Request request) {
+    // Always go to network for uncacheable response codes (RFC 7231 section 6.1),
+    // This implementation doesn&#39;t support caching partial content.
+    switch (response.code()) {//根据respone中的返回状态码来确定该respone是否可以被缓存
+      case HTTP_OK:
+      case HTTP_NOT_AUTHORITATIVE:
+      case HTTP_NO_CONTENT:
+      case HTTP_MULT_CHOICE:
+      case HTTP_MOVED_PERM:
+      case HTTP_NOT_FOUND:
+      case HTTP_BAD_METHOD:
+      case HTTP_GONE:
+      case HTTP_REQ_TOO_LONG:
+      case HTTP_NOT_IMPLEMENTED:
+      case StatusLine.HTTP_PERM_REDIRECT:
+        // These codes can be cached unless headers forbid it.
+        break;
+
+      case HTTP_MOVED_TEMP:
+      case StatusLine.HTTP_TEMP_REDIRECT:
+        // These codes can only be cached with the right response headers.
+        // http://tools.ietf.org/html/rfc7234#section-3
+        // s-maxage is not checked because OkHttp is a private cache that should ignore s-maxage.
+        if (response.header(&quot;Expires&quot;) != null
+            || response.cacheControl().maxAgeSeconds() != -1
+            || response.cacheControl().isPublic()
+            || response.cacheControl().isPrivate()) {
+          break;
+        }
+        // Fall-through.
+
+      default:
+        // All other codes cannot be cached.
+        return false;
+    }
+
+    // A &#39;no-store&#39; directive on request or response prevents the response from being cached.
+    return !response.cacheControl().noStore() &amp;&amp; !request.cacheControl().noStore();
+  }
+
+}</code></pre><p>可以看出它的实现很简单，有一个networkRequest用来进行网络请求（使用缓存则为null）一个cacheResponse表示缓存响应（如果使用网络则为null），并提供了一个isCacheable来判断传入的respone是否可以被缓存。</p>
+<p>除此之外CacheStrategy还有一个内部工厂类Factory用来对外提供CacheStrategy实例。</p>
+<pre><code> public static class Factory {
+    final long nowMillis;
+    final Request request;
+    final Response cacheResponse;
+
+    /** The server&#39;s time when the cached response was served, if known. */
+    private Date servedDate;
+    private String servedDateString;
+
+    /** The last modified date of the cached response, if known. */
+    private Date lastModified;
+    private String lastModifiedString;
+
+    /**
+     * The expiration date of the cached response, if known. If both this field and the max age are
+     * set, the max age is preferred.
+     */
+    private Date expires;
+
+    /**
+     * Extension header set by OkHttp specifying the timestamp when the cached HTTP request was
+     * first initiated.
+     */
+    private long sentRequestMillis;
+
+    /**
+     * Extension header set by OkHttp specifying the timestamp when the cached HTTP response was
+     * first received.
+     */
+    private long receivedResponseMillis;
+
+    /** Etag of the cached response. */
+    private String etag;
+
+    /** Age of the cached response. */
+    private int ageSeconds = -1;
+
+    public Factory(long nowMillis, Request request, Response cacheResponse) {
+      this.nowMillis = nowMillis;
+      this.request = request;
+      this.cacheResponse = cacheResponse;
+
+      if (cacheResponse != null) {
+        this.sentRequestMillis = cacheResponse.sentRequestAtMillis();
+        this.receivedResponseMillis = cacheResponse.receivedResponseAtMillis();
+        Headers headers = cacheResponse.headers();
+        for (int i = 0, size = headers.size(); i &lt; size; i++) {
+          String fieldName = headers.name(i);
+          String value = headers.value(i);
+          if (&quot;Date&quot;.equalsIgnoreCase(fieldName)) {
+            servedDate = HttpDate.parse(value);
+            servedDateString = value;
+          } else if (&quot;Expires&quot;.equalsIgnoreCase(fieldName)) {
+            expires = HttpDate.parse(value);
+          } else if (&quot;Last-Modified&quot;.equalsIgnoreCase(fieldName)) {
+            lastModified = HttpDate.parse(value);
+            lastModifiedString = value;
+          } else if (&quot;ETag&quot;.equalsIgnoreCase(fieldName)) {
+            etag = value;
+          } else if (&quot;Age&quot;.equalsIgnoreCase(fieldName)) {
+            ageSeconds = HttpHeaders.parseSeconds(value, -1);
+          }
+        }
+      }
+    }
+  }</code></pre><p>外部获取CacheStrategy实例方式一般如下：</p>
+<pre><code>CacheStrategy strategy = new CacheStrategy.Factory(now, chain.request(), cacheCandidate).get();</code></pre><p>可以看出是构造了一个Factory然后通过其get()函数获取CacheStrategy实例的。在Factory的构造函数中会解析传入的缓存respone（仅非null情况）的header获取相关字段的值如Expires、Last-Modified、ETag等等。接下来看下get函数。</p>
+<pre><code>   /**
+     * Returns a strategy to satisfy {@code request} using the a cached response {@code response}.
+     */
+    public CacheStrategy get() {
+      CacheStrategy candidate = getCandidate();
+
+      if (candidate.networkRequest != null &amp;&amp; request.cacheControl().onlyIfCached()) {
+        // We&#39;re forbidden from using the network and the cache is insufficient.
+        return new CacheStrategy(null, null);
+      }
+
+      return candidate;
+    }</code></pre><p>Get函数调用getCandidate获取了一个CacheStrategy，然后如果当前禁止使用网络且缓存不可用则会返回一个networkRequest、cacheResponse均为null的CacheStrategy否则返回getCandidate获取的getCandidate获取。</p>
+<p>来看下getCandidate是如何获取CacheStrategy的</p>
+<pre><code>
+    /** Returns a strategy to use assuming the request can use the network. */
+    private CacheStrategy getCandidate() {
+      // No cached response.没有缓存则返回一个cacheresponse为null的CacheStrategy
+      if (cacheResponse == null) {
+        return new CacheStrategy(request, null);
+      }
+
+      // Drop the cached response if it&#39;s missing a required handshake.请求是https且缺少必要的握手返回一个cacheresponse为null的CacheStrategy
+      if (request.isHttps() &amp;&amp; cacheResponse.handshake() == null) {
+        return new CacheStrategy(request, null);
+      }
+
+      // If this response shouldn&#39;t have been stored, it should never be used
+      // as a response source. This check should be redundant as long as the
+      // persistence store is well-behaved and the rules are constant.不能被缓存返回一个cacheresponse为null的CacheStrategy
+      if (!isCacheable(cacheResponse, request)) {
+        return new CacheStrategy(request, null);
+      }
+
+      CacheControl requestCaching = request.cacheControl();
+      if (requestCaching.noCache() || hasConditions(request)) {//请求中CacheControl设置不用缓存返回一个cacheresponse为null的CacheStrategy
+        return new CacheStrategy(request, null);
+      }
+
+      CacheControl responseCaching = cacheResponse.cacheControl();
+
+      long ageMillis = cacheResponseAge();
+      long freshMillis = computeFreshnessLifetime();
+
+      if (requestCaching.maxAgeSeconds() != -1) {
+        freshMillis = Math.min(freshMillis, SECONDS.toMillis(requestCaching.maxAgeSeconds()));
+      }
+
+      long minFreshMillis = 0;
+      if (requestCaching.minFreshSeconds() != -1) {
+        minFreshMillis = SECONDS.toMillis(requestCaching.minFreshSeconds());
+      }
+
+      long maxStaleMillis = 0;
+      if (!responseCaching.mustRevalidate() &amp;&amp; requestCaching.maxStaleSeconds() != -1) {
+        maxStaleMillis = SECONDS.toMillis(requestCaching.maxStaleSeconds());
+      }
+            //如果响应缓存中没有配置 “no-cache”,并且 持续时间+最短刷新时间 &lt; 上次刷新时间+最大验证时间 如果都满足条件的话则可以缓存
+      if (!responseCaching.noCache() &amp;&amp; ageMillis + minFreshMillis &lt; freshMillis + maxStaleMillis) {
+        Response.Builder builder = cacheResponse.newBuilder();
+        if (ageMillis + minFreshMillis &gt;= freshMillis) {
+          builder.addHeader(&quot;Warning&quot;, &quot;110 HttpURLConnection \&quot;Response is stale\&quot;&quot;);
+        }
+        long oneDayMillis = 24 * 60 * 60 * 1000L;
+        if (ageMillis &gt; oneDayMillis &amp;&amp; isFreshnessLifetimeHeuristic()) {
+          builder.addHeader(&quot;Warning&quot;, &quot;113 HttpURLConnection \&quot;Heuristic expiration\&quot;&quot;);
+        }
+        return new CacheStrategy(null, builder.build());
+      }
+
+      // Find a condition to add to the request. If the condition is satisfied, the response body
+      // will not be transmitted.
+      String conditionName;
+      String conditionValue;
+      if (etag != null) {
+        conditionName = &quot;If-None-Match&quot;;
+        conditionValue = etag;
+      } else if (lastModified != null) {
+        conditionName = &quot;If-Modified-Since&quot;;
+        conditionValue = lastModifiedString;
+      } else if (servedDate != null) {
+        conditionName = &quot;If-Modified-Since&quot;;
+        conditionValue = servedDateString;
+      } else {
+        return new CacheStrategy(request, null); // No condition! Make a regular request.
+      }
+
+      Headers.Builder conditionalRequestHeaders = request.headers().newBuilder();
+      Internal.instance.addLenient(conditionalRequestHeaders, conditionName, conditionValue);
+
+      Request conditionalRequest = request.newBuilder()
+          .headers(conditionalRequestHeaders.build())
+          .build();
+      return new CacheStrategy(conditionalRequest, cacheResponse);
+    }
+</code></pre><p>可以看出getCandidate主要作用就是根据不同的情况返回对应的CacheStrategy。</p>
+<h3 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h3><p>Cache作用是将HTTP和HTTPS响应缓存到文件系统，以便它们可以重复使用，从而节省时间和带宽。</p>
+<pre><code>public final class Cache implements Closeable, Flushable {
+
+  final DiskLruCache cache;、//内部持有一个DiskLruCache
+
+  /* read and write statistics, all guarded by &#39;this&#39; */
+  int writeSuccessCount;
+  int writeAbortCount;
+  private int networkCount;
+  private int hitCount;
+  private int requestCount;
+
+  /**
+   * Create a cache of at most {@code maxSize} bytes in {@code directory}.
+   */
+  public Cache(File directory, long maxSize) {
+    this(directory, maxSize, FileSystem.SYSTEM);
+  }
+
+  Cache(File directory, long maxSize, FileSystem fileSystem) {
+    this.cache = DiskLruCache.create(fileSystem, directory, VERSION, ENTRY_COUNT, maxSize);
+  }
+}</code></pre><p>通过Cache的构造函数我们看到构造Cache需要指定缓存目录以及缓存文件的最大存储量。并且Cache实际的存储是通过DiskLruCache完成的。<br>那么我们来看下Cache的增删改查操作。</p>
+<h4 id="增———put操作"><a href="#增———put操作" class="headerlink" title="增———put操作"></a>增———put操作</h4><pre><code>@Nullable CacheRequest put(Response response) {
+  String requestMethod = response.request().method();
+//如果是&quot;POST&quot;、&quot;PATCH&quot;、&quot;PUT&quot;、&quot;DELETE&quot;、&quot;MOVE&quot;中的任何一个则通过remove将这个请求从缓存中移除出去
+  if (HttpMethod.invalidatesCache(response.request().method())) {
+    try {
+      remove(response.request());
+    } catch (IOException ignored) {
+      // The cache cannot be written.
+    }
+    return null;
+  }
+   //如果请求不是Get则不进行缓存，直接返回null。官方给的解释是缓存get方法得到的Response效率高，其它方法的Response没有缓存效率低。通常通过get方法获取到的数据都是固定不变的的，因此缓存效率自然就高了。其它方法会根据请求报文参数的不同得到不同的Response，因此缓存效率自然而然就低了。
+
+  if (!requestMethod.equals(&quot;GET&quot;)) {
+    // Don&#39;t cache non-GET responses. We&#39;re technically allowed to cache
+    // HEAD requests and some POST requests, but the complexity of doing
+    // so is high and the benefit is low.
+    return null;
+  }
+//判断请求中的http数据包中headers是否有符号&quot;*&quot;的通配符，有则不缓存直接返回null
+  if (HttpHeaders.hasVaryAll(response)) {
+    return null;
+  }
+
+  Entry entry = new Entry(response);
+  DiskLruCache.Editor editor = null;
+  try {
+//通过调用DiskLruCache.edit()方法得到一个DiskLruCache.Editor对象
+    editor = cache.edit(key(response.request().url()));
+    if (editor == null) {
+      return null;
+    }
+//把这个entry写入
+//方法内部是通过Okio.buffer(editor.newSink(ENTRY_METADATA));获取到一个BufferedSink对象，随后将Entry中存储的Http报头数据写入到sink流中。
+    entry.writeTo(editor);
+//构建一个CacheRequestImpl对象，构造器中通过editor.newSink(ENTRY_BODY)方法获得Sink对象
+    return new CacheRequestImpl(editor);
+  } catch (IOException e) {
+    abortQuietly(editor);
+    return null;
+  }
+}</code></pre><p>CacheRequestImpl构造函数</p>
+<pre><code>CacheRequestImpl(final DiskLruCache.Editor editor) {
+  this.editor = editor;
+  this.cacheOut = editor.newSink(ENTRY_BODY);
+  this.body = new ForwardingSink(cacheOut) {
+    @Override public void close() throws IOException {
+      synchronized (Cache.this) {
+        if (done) {
+          return;
+        }
+        done = true;
+        writeSuccessCount++;
+      }
+      super.close();
+      editor.commit();
+    }
+  };
+}</code></pre><h4 id="删———remove"><a href="#删———remove" class="headerlink" title="删———remove"></a>删———remove</h4><pre><code>void remove(Request request) throws IOException {
+  cache.remove(key(request.url()));
+}
+
+public static String key(HttpUrl url) {
+  return ByteString.encodeUtf8(url.toString()).md5().hex();
+}
+</code></pre><p>remove就是调用DiskLruCache的remove操作进行移除，注意此处是根据key来进行移除的，keyurl是url的MD5和hex生成的。</p>
+<h4 id="改———update"><a href="#改———update" class="headerlink" title="改———update"></a>改———update</h4><pre><code>void update(Response cached, Response network) {
+  Entry entry = new Entry(network);
+  DiskLruCache.Snapshot snapshot = ((CacheResponseBody) cached.body()).snapshot;
+//从DiskLruCache.Snapshot获取DiskLruCache.Editor()对象
+  DiskLruCache.Editor editor = null;
+  try {
+    editor = snapshot.edit(); // Returns null if snapshot is not current.
+    if (editor != null) {
+        //将entry写入editor中
+      entry.writeTo(editor);
+      editor.commit();
+    }
+  } catch (IOException e) {
+    abortQuietly(editor);
+  }
+}</code></pre><h4 id="查———get"><a href="#查———get" class="headerlink" title="查———get"></a>查———get</h4><pre><code>@Nullable Response get(Request request) {
+  String key = key(request.url());//获取key
+  DiskLruCache.Snapshot snapshot;
+  Entry entry;
+  try {
+//通过DiskLruCache.get获取一个snapshot
+    snapshot = cache.get(key);
+    if (snapshot == null) {
+      return null;
+    }
+  } catch (IOException e) {
+    // Give up because the cache cannot be read.
+    return null;
+  }
+
+  try {
+    //利用前面的Snapshot创建一个Entry对象。存储的内容是响应的Http数据包Header部分的数据。snapshot.getSource得到的是一个Source对象 (source是okio里面的一个接口)
+    entry = new Entry(snapshot.getSource(ENTRY_METADATA));
+  } catch (IOException e) {
+    Util.closeQuietly(snapshot);
+    return null;
+  }
+    //利用entry和snapshot得到Response对象，该方法内部会利用前面的Entry和Snapshot得到响应的Http数据包Body（body的获取方式通过snapshot.getSource(ENTRY_BODY)得到）创建一个CacheResponseBody对象；再利用该CacheResponseBody对象和第三步得到的Entry对象构建一个Response的对象，这样该对象就包含了一个网络响应的全部数据了。
+  Response response = entry.response(snapshot);
+    //对request和Response进行比配检查，成功则返回该Response。匹配方法就是url.equals(request.url().toString()) &amp;&amp; requestMethod.equals(request.method()) &amp;&amp; OkHeaders.varyMatches(response, varyHeaders, request);其中Entry.url和Entry.requestMethod两个值在构建的时候就被初始化好了，初始化值从命中的缓存中获取。因此该匹配方法就是将缓存的请求url和请求方法跟新的客户请求进行对比。最后OkHeaders.varyMatches(response, varyHeaders, request)是检查命中的缓存Http报头跟新的客户请求的Http报头中的键值对是否一样。如果全部结果为真，则返回命中的Response。
+  if (!entry.matches(request, response)) {
+    Util.closeQuietly(response.body());
+    return null;
+  }
+
+  return response;
+}</code></pre><p>可以看出Cache的操作都是通过DiskLruCache来完成的，DiskLruCache的实现在此就不展开分析了。</p>
+<p>以上就是Http的缓存知识以及Okhttp缓存机制的源码分析。</p>
+
+            <hr>
+          </div>
+          <br>
+          <div>
+            <div id="post-tag">
+              
+              <span>
+                <i class="iconfont icon-tag"></i>
+                
+                  <a class="hover-with-bg" href="/tags/Okhttp">Okhttp</a>
+                
+              </span>
+            </div>
+            
+              <div id="post-note">
+                <div><strong>本文作者：</strong><a href="/">myname</a></div>
+                <div><strong>本文链接：</strong><a href="http://yoursite.com/2019/11/24/Okhttp4/">http://yoursite.com/2019/11/24/Okhttp4/</a></div>
+                <div><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</div>
+              </div>
+            
+            
+              <div id="post-nav" class="container">
+                  <div class="row">
+                    
+                      <a href="/2019/11/30/ActivityDK/" id="post-nav-prev" class="col">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="post-nav-title">Activity知识详解</span>
+                      </a>
+                    
+                    
+                      <a href="/2019/11/17/Okhttp3/" id="post-nav-next" class="col">
+                        <span class="post-nav-title">Okhttp解析之--Interceptor详解</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+            
+          </div>
+        </div>
+
+        <!-- custom -->
+        
+
+        <!-- Comments -->
+        <div class="col-lg-10 mx-auto nopadding-md">
+          <div class="container comments mx-auto" id="comments">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;ディレクトリ</p>
+    <div id="tocbot"></div>
+  </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+  </main>
+  
+<div id="sidebar" class="sidebar-hide">
+  <span class="sidebar-button sidebar-button-shift" id="toggle-sidebar" >
+    <i class="fa fa-arrow-right on" aria-hidden="true"></i>
+  </span>
+  <div class="sidebar-overlay"></div>
+  <div class="sidebar-intrude">
+    <div class="sidebar-avatar">
+      <img src="/img/favicon.png" srcset="/img/favicon.png" alt="avatar"/>
+    </div>
+    <div class="text-center sidebar-about">
+      <p class="h3 sidebar-author">Robin</p>
+      <p class="sidebar-subtitle"></p>
+      
+        <a href="https://github.com" class="h4" target="_blank">
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="https://twitter.com" class="h4" target="_blank">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="mailto:example@example.com" class="h4" target="_blank">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+    </div>
+    <div class="sidebar-friend">
+      <p class="h6 sidebar-friend-title">
+        <span class="sidebar-label-left"><i class="fas fa-user-friends"></i></span>
+        <span class="sidebar-label">友情链接</span>
+      </p>
+      <ul class="list-group">
+        
+          <a href="https://example.com/" target="_blank">
+            <li class="list-group-item">
+              <i class="fas fa-quote-left"></i>&nbsp;
+              friendname
+            </li>
+          </a>
+        
+    </ul>
+    </div>
+  </div>
+</div>
+
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">検索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">キーワード</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <div id="footerContent"  class="rgba-black-slight">
+<footer class="pt-5">
+  <div class="text-center py-3">
+  
+
+    
+      <div class="footer-copyright">
+        
+          ©2020&nbsp;robin
+        
+        
+          
+            <i class="iconfont icon-love"></i>
+          
+          <span>运转了<span id="runtime"></span>天</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+    
+  </div>
+</footer>
+</div>
+<!-- SCRIPTS -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js" ></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
+<script src="https://cdn.staticfile.org/mdbootstrap/4.8.9/js/mdb.min.js" ></script>
+<script src="/js/main.js" ></script>
+
+  <script src="/js/lazyload.js" ></script>
+
+
+  
+    <script src="https://cdn.staticfile.org/tocbot/4.8.0/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
+<!-- Plugins -->
+
+  <script src="https://cdn.staticfile.org/prettify/r298/prettify.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/typed.js/2.0.10/typed.min.js" ></script>
+  <script type="text/javascript">
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Okhttp解析之—okhttp缓存机制&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/anchor-js/4.2.0/anchor.min.js" ></script>
+  <script type="text/javascript">
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+  <script src="/js/local-search.js" ></script>
+  <script type="text/javascript">
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script type="text/javascript">
+  /* Fancybox */
+  var setupFancybox = function () {
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(function() {
+    var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      $(this).wrap(element);
+    });
+  };
+  setupFancybox();
+  </script>
+
+
+
+
+  <!-- 首页文章列表随机图片 -->
+  <script type="text/javascript">
+    $("img.image_random").each(function(){
+      
+        var xjhUrl = "//img.xjh.me/random_img.php?return=json";
+      
+      var _this = $(this);
+      $.get(xjhUrl,function(data,status){
+        if(status === "success"){
+          if(data.result === 200){
+            _this[0].src = data.img;
+          }
+        }
+      });
+    });
+  </script>
+
+
+
+
+  <script async src="//cdn.jsdelivr.net/npm/busuanzi@2.3.0/bsz.pure.mini.js" ></script>
+  
+
+
+  
+  
+    <script type="text/javascript">
+      //定义获取词语下标
+      var a_idx = 0;
+      jQuery(document).ready(function ($) {
+        //点击body时触发事件
+        $("body").click(function (e) {
+          //需要显示的词语
+          var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+          //设置词语给span标签
+          var $i = $("<span/>").text(a[a_idx]);
+          //下标等于原来下标+1  余 词语总数
+          a_idx = (a_idx + 1) % a.length;
+          //获取鼠标指针的位置，分别相对于文档的左和右边缘。
+          //获取x和y的指针坐标
+          var x = e.pageX, y = e.pageY;
+          //在鼠标的指针的位置给$i定义的span标签添加css样式
+          $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": rand_color()
+          });
+          // 随机颜色
+          function rand_color() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+          }
+          //在body添加这个标签
+          $("body").append($i);
+          //animate() 方法执行 CSS 属性集的自定义动画。
+          //该方法通过CSS样式将元素从一个状态改变为另一个状态。CSS属性值是逐渐改变的，这样就可以创建动画效果。
+          //详情请看http://www.w3school.com.cn/jquery/effect_animate.asp
+          $i.animate({
+            //将原来的位置向上移动180
+            "top": y - 180,
+            "opacity": 0
+            //1500动画的速度
+          }, 1500, function () {
+            //时间到了自动删除
+            $i.remove();
+          });
+        });
+      })
+      ;
+    </script>
+  
+
+
+<!-- Functions -->
+<script type="text/javascript">
+  /* 切换背景 */
+  
+    $("body").removeClass("banner-bg");
+    $("#background").addClass("banner-bg");
+    $('#mainContent').removeClass("rgba-black-slight");
+    $('#footerContent').removeClass("rgba-black-slight");
+    if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) || (/Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent))) {
+      $("#background").css("background-attachment", "scroll");
+    }
+  
+</script>
+
+  <script type="text/javascript">
+    /*显示博客运行时间*/
+    var blogRunTime = function () {
+      var runTime = document.getElementById("runtime");
+      var runtimeDate = "2019,04,20";
+	    var createDate = new Date(runtimeDate);
+	    var nowDate = new Date();
+	    var dateLine = nowDate.getTime() - createDate.getTime();
+	    var runDate = Math.floor(dateLine / (1000 * 60 * 60 * 24));
+	    runTime.innerHTML = runDate;
+    };
+    $(document).ready(function(){
+	    blogRunTime();
+    });
+  </script>
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+  
+</body>
+</html>

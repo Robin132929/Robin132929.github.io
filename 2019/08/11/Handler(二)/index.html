@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="author" content="robin">
+  
+    <meta name="description" content="导读：上篇文章我们介绍了Handler的基本使用以及Handler机制调用流程的源码跟踪分析。这篇文章我们来详细的解析下Handler机制设计的4个类中都做了什么。">
+  
+  
+    <meta name="keywords" content="Handler," />
+  
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <title>Handler三部曲(二) ~ Robin</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.10.2/css/all.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.8.9/css/mdb.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css"  >
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+  <link rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css"  >
+
+
+  <link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"  >
+
+<link rel="stylesheet" href="/css/main.css"  >
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+  <style type="text/css">
+    .banner-bg {
+      
+        background-image: url('/img/default.png');
+      
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  </style>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="banner-bg">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Robin</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">主页</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/reading/">读书</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/photo/">相册</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">归档</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">标签</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+</nav>
+
+    <div class="view intro-2 rgba-black-slight" id="background">
+      <div class="full-bg-img">
+        <div class="mask flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+            
+              <br>
+              <p class="mt-3">
+                <i class="far fa-calendar-alt"></i>
+                <span class="post-date">2019-08-11&nbsp;|&nbsp;</span>
+                <i class="far fa-chart-bar"></i>
+                <span class="post-count">5.1k</span>字&nbsp;|&nbsp;
+                <i class="far fa-clock"></i>
+                <span class="post-count">24</span>分钟
+                
+                  <span id="busuanzi_container_page_pv" style="display:none">
+                    &nbsp;|&nbsp;
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv"></span>次
+                  </span>
+                
+              </p>
+            
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="rgba-black-slight">
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto" id="post">
+          <div class="markdown-body">
+            <p>导读：上篇文章我们介绍了Handler的基本使用以及Handler机制调用流程的源码跟踪分析。这篇文章我们来详细的解析下Handler机制设计的4个类中都做了什么。</p>
+<a id="more"></a>
+
+
+<h1 id="Handler三部曲（二）"><a href="#Handler三部曲（二）" class="headerlink" title="Handler三部曲（二）"></a>Handler三部曲（二）</h1><h3 id="一、Handler"><a href="#一、Handler" class="headerlink" title="一、Handler"></a>一、Handler</h3><p>Handler主要负责消息的发送以及消息最终的处理。</p>
+<p><strong>1、首先看下Handler内部常用的变量</strong></p>
+<pre><code>  public class Handler {
+        /**
+         * Hanlder内部变量
+         */
+        private static android.os.Handler MAIN_THREAD_HANDLER = null; //表示主线程Hanlder实例
+        final Looper mLooper; //handler持有的looper对象
+        final MessageQueue mQueue; //handler持有的messagequeue对象 ，通过mLooper.mQueue为其赋值
+        final android.os.Handler.Callback mCallback;  //handler的callback
+    }
+
+</code></pre><p><strong>2、然后是Handler的构造函数，此处要说明的是Handler公开的构造函数有4种，另外还有3种属于hide，我们不可调用的。</strong></p>
+<pre><code>   public class Handler {
+
+        /**
+         * Handler 构造函数前四种是可调用的，后面三种不可调用
+         */
+        public Handler() {
+            this(null, false);
+        }
+
+        public Handler(android.os.Handler.Callback callback) {
+            this(callback, false);
+        }
+
+        public Handler(Looper looper) {
+            this(looper, null, false);
+        }
+
+        public Handler(Looper looper, android.os.Handler.Callback callback) {
+            this(looper, callback, false);
+        }
+
+        public Handler(boolean async) {
+            this(null, async);
+        }
+
+        public Handler(android.os.Handler.Callback callback, boolean async) {
+            if (FIND_POTENTIAL_LEAKS) {
+                final Class&lt;? extends android.os.Handler&gt; klass = getClass();
+                if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &amp;&amp;
+                        (klass.getModifiers() &amp; Modifier.STATIC) == 0) {
+                    Log.w(TAG, &quot;The following Handler class should be static or leaks might occur: &quot; +
+                            klass.getCanonicalName());
+                }
+            }
+
+            mLooper = Looper.myLooper();//详见Looper类解析
+            if (mLooper == null) {
+                throw new RuntimeException(
+                        &quot;Can&#39;t create handler inside thread that has not called Looper.prepare()&quot;);
+            }
+            mQueue = mLooper.mQueue;
+            mCallback = callback;
+            mAsynchronous = async;
+        }
+
+        public Handler(Looper looper, android.os.Handler.Callback callback, boolean async) {
+            mLooper = looper;
+            mQueue = looper.mQueue;
+            mCallback = callback;
+            mAsynchronous = async;
+        }
+
+    }</code></pre><p>可以看出可调用的4种构造函数最终都是调用这两个构造函数</p>
+<pre><code>Handler(android.os.Handler.Callback callback, boolean async) //方法6
+
+Handler(Looper looper, android.os.Handler.Callback callback, boolean async) //方法7</code></pre><p>这两个构造函数主要是为一些属性值进行赋值，包括mLooper、mQueue、mCallback等。</p>
+<p><strong>3、接下来就是Handler定义的各种方法函数。这些函数常用的主要分为以下几类：发送消息相关函数、获取Message实例相关函数、移除消息。</strong></p>
+<p><strong>先说发送消息相关函数，它包括send和post两种方式</strong></p>
+<pre><code>  public class Handler {
+
+        /** 发送消息分为send和post两种
+         *
+         */
+        public final boolean sendMessage(Message msg)
+        {
+            return sendMessageDelayed(msg, 0);
+        }
+
+        public final boolean sendEmptyMessage(int what)
+        {
+            return sendEmptyMessageDelayed(what, 0);
+        }
+        public final boolean sendEmptyMessageDelayed(int what, long delayMillis) {
+            Message msg = Message.obtain();
+            msg.what = what;
+            return sendMessageDelayed(msg, delayMillis);
+        }
+
+        public final boolean post(Runnable r)
+        {
+            return  sendMessageDelayed(getPostMessage(r), 0);
+        }
+
+        public final boolean postAtTime(Runnable r, long uptimeMillis)
+        {
+            return sendMessageAtTime(getPostMessage(r), uptimeMillis);
+        }
+
+        public final boolean postDelayed(Runnable r, long delayMillis)
+        {
+            return sendMessageDelayed(getPostMessage(r), delayMillis);
+        }
+        public final boolean sendMessageDelayed(Message msg, long delayMillis)
+        {
+            if (delayMillis &lt; 0) {
+                delayMillis = 0;
+            }
+            return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis);
+        }
+
+        public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
+            MessageQueue queue = mQueue;
+            if (queue == null) {
+                RuntimeException e = new RuntimeException(
+                        this + &quot; sendMessageAtTime() called with no mQueue&quot;);
+                Log.w(&quot;Looper&quot;, e.getMessage(), e);
+                return false;
+            }
+            return enqueueMessage(queue, msg, uptimeMillis);
+        }
+
+        private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
+        msg.target = this;
+        if (mAsynchronous) {
+            msg.setAsynchronous(true);
+        }
+        return queue.enqueueMessage(msg, uptimeMillis);
+        }
+    }
+</code></pre><p>我们分析发现不管是send还是post最终都是调用的sendMessageAtTime，在sendMessageAtTime函数中会调用enqueueMessage，enqueueMessage中会调用MessageQueue的入队函数把msg入队。</p>
+<pre><code> private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
+        msg.target = this;
+        if (mAsynchronous) {
+            msg.setAsynchronous(true);
+        }
+        return queue.enqueueMessage(msg, uptimeMillis);
+    }</code></pre><p><strong>获取Message相关函数</strong></p>
+<pre><code>   public class Handler {
+        public final Message obtainMessage()
+        {
+            return Message.obtain(this);
+        }
+
+        public final Message obtainMessage(int what)
+        {
+            return Message.obtain(this, what);
+        }
+
+        public final Message obtainMessage(int what, Object obj)
+        {
+            return Message.obtain(this, what, obj);
+        }
+
+        public final Message obtainMessage(int what, int arg1, int arg2)
+        {
+            return Message.obtain(this, what, arg1, arg2);
+        }
+
+        public final Message obtainMessage(int what, int arg1, int arg2, Object obj)
+        {
+            return Message.obtain(this, what, arg1, arg2, obj);
+        }
+    }</code></pre><p>Handler的obtainMessage可以根据需求获取我们想要的Message实例而不用我们new一个Message实例。在实际的使用过程中更推荐通过obtainMessage方式获取Message这样效率更高。Handler的obtainMessage没有做任何操作都是调用的Message的obtain方法获取Message实例（关于Message的obtain方法 详见Message类解析）</p>
+<p><strong>Handler的remove方法，该类方法可以帮助我们移除对应的message或callback。</strong></p>
+<pre><code>public class Handler {
+        public final void removeCallbacks(Runnable r)
+        {
+            mQueue.removeMessages(this, r, null);
+        }
+
+        public final void removeCallbacks(Runnable r, Object token)
+        {
+            mQueue.removeMessages(this, r, token);
+        }
+
+        public final void removeMessages(int what) {
+            mQueue.removeMessages(this, what, null);
+        }
+
+        public final void removeMessages(int what, Object object) {
+            mQueue.removeMessages(this, what, object);
+        }
+
+        public final void removeCallbacksAndMessages(Object token) {
+            mQueue.removeCallbacksAndMessages(this, token);
+        }
+
+    }</code></pre><p>remove方法内部都是直接调用MessageQueue的remove方法（具体实现详见MessageQueue类解析）</p>
+<p><strong>4、其他一些常用函数</strong></p>
+<pre><code>    public class Handler {
+
+        /**
+         * Handle system messages here.
+         */
+        public void dispatchMessage(Message msg) {
+            if (msg.callback != null) {
+                handleCallback(msg);
+            } else {
+                if (mCallback != null) {
+                    if (mCallback.handleMessage(msg)) {
+                        return;
+                    }
+                }
+                handleMessage(msg);
+            }
+        }
+
+        public void handleMessage(Message msg) {
+        }
+
+        /**
+         * Callback interface you can use when instantiating a Handler to avoid
+         * having to implement your own subclass of Handler.
+         */
+        public interface Callback {
+            /**
+             * @param msg A {@link android.os.Message Message} object
+             * @return True if no further handling is desired
+             */
+            public boolean handleMessage(Message msg);
+        }
+    }
+</code></pre><p>dispatchMessage完成的是Handler对消息的分发处理，消息处理的优先级依次是Message。callback&gt;Handler.callback&gt;Handler handleMessage。</p>
+<p><strong>至此我们对Handler类有了一个比较全面的认识。总结来说就是Handler通过构造函数为其内部变量赋值，然后通过obtainMessage获取Message，通过send/post方法发送Message（Runnable），通过remove方法移除queue中的Message，通过dispatchMessage、handleMessage去分发处理Message。</strong></p>
+<p>Handler问题总结：</p>
+<h3 id="二、Message"><a href="#二、Message" class="headerlink" title="二、Message"></a>二、Message</h3><p>Message在Handler机制中作用是作为消息的载体而存在。</p>
+<p><strong>1、主要属性</strong></p>
+<pre><code>   public final class Message {
+        //消息载体相关字段
+        public int what;
+        public int arg1;
+        public int arg2;
+        public Object obj;
+
+        /*package*/ static final int FLAG_IN_USE = 1 &lt;&lt; 0; //标记字段 标记Message是否正在使用
+        /*package*/ int flags;
+        /*package*/ long when; //Message触发的时间 MessageQueue中根据该字段对Message进行入队出对操作
+        /*package*/ Handler target;  //标记Message是由哪个Handler发送的
+        /*package*/ Runnable callback; //post发送消息时传入的Runnable
+        // sometimes we store linked lists of these things
+        /*package*/ android.os.Message next;  //作用是充当next指针
+        private static final Object sPoolSync = new Object();
+        private static android.os.Message sPool;  //Message 缓冲池
+        private static int sPoolSize = 0;  //Message 缓冲池大小
+        private static final int MAX_POOL_SIZE = 50;   //Message 缓冲池最大容量
+    }</code></pre><p>消息载体相关字段就是我们传输的内容。</p>
+<p><strong>2、obtain获取Message函数</strong></p>
+<pre><code>  public final class Message {
+        /**
+         * Message提供了很多obtain方法来获取Message实例
+         *
+         * 
+         */
+
+        public static android.os.Message obtain() {
+            synchronized (sPoolSync) {//加锁 同步
+                if (sPool != null) { //如果sPool不为空即Message缓存池不空就从中取出一个Message
+                    android.os.Message m = sPool;
+                    sPool = m.next;
+                    m.next = null;
+                    m.flags = 0; // clear in-use flag
+                    sPoolSize--;//缓存池大小减一
+                    return m;
+                }
+            }
+            //如果缓存池为空则new 一个Message返回
+            return new android.os.Message();
+        }
+
+        public static android.os.Message obtain(android.os.Message orig) {
+            android.os.Message m = obtain();
+            m.what = orig.what;
+            m.arg1 = orig.arg1;
+            m.arg2 = orig.arg2;
+            m.obj = orig.obj;
+            m.replyTo = orig.replyTo;
+            m.sendingUid = orig.sendingUid;
+            if (orig.data != null) {
+                m.data = new Bundle(orig.data);
+            }
+            m.target = orig.target;
+            m.callback = orig.callback;
+
+            return m;
+        }
+
+        public static android.os.Message obtain(Handler h) {
+            android.os.Message m = obtain();
+            m.target = h;
+
+            return m;
+        }
+    }</code></pre><p>obtain方法有很多重载，这里只是列举了其中的几个。浏览源码我们发现众多的obtain函数都是通过obtain（）这个无参函数来获取Message实例，只不过之后还会对获得的Message实例的相关变量赋值。在obtain（）方法中会判断Message缓存池是否为空 不为空则取出一个缓存的Message返回，否则new一个Message返回。</p>
+<p>在解析Handler类时我们发现了Handler类中有很多obtainMessage方法，只不过它们都是调用对应的Message的obtain方法。当时我们曾说推荐使用obtain方法获取Message，现在想必你这应该明白为什么了吧。</p>
+<p><strong>3、Message回收相关函数</strong></p>
+<pre><code>   public final class Message {
+        public void recycle() {
+            if (isInUse()) {
+                if (gCheckRecycle) {
+                    throw new IllegalStateException(&quot;This message cannot be recycled because it &quot;
+                            + &quot;is still in use.&quot;);
+                }
+                return;
+            }
+            recycleUnchecked();
+        }
+
+        /**
+         * Recycles a Message that may be in-use.
+         * Used internally by the MessageQueue and Looper when disposing of queued Messages.
+         */
+        void recycleUnchecked() {
+            // Mark the message as in use while it remains in the recycled object pool.
+            // Clear out all other details.
+            flags = FLAG_IN_USE;
+            what = 0;
+            arg1 = 0;
+            arg2 = 0;
+            obj = null;
+            replyTo = null;
+            sendingUid = -1;
+            when = 0;
+            target = null;
+            callback = null;
+            data = null;
+
+            synchronized (sPoolSync) {
+                if (sPoolSize &lt; MAX_POOL_SIZE) {
+                    next = sPool;
+                    sPool = this;
+                    sPoolSize++;
+                }
+            }
+        }
+
+    }</code></pre><p>上面我们分析了obtain方法是如何获取Message的，现在就来看下使用完的Message是如何“回收”的。</p>
+<p>由上面两个函数我们可知，Message的“回收”实际是在<br>recycleUnchecked函数中完成的，它首先会把Message的字段设置为默认值，然后判断当前缓存池大小是否超过MAX_POOL_SIZE（默认为50），如果未超过那么就会把该Message加入缓存池。</p>
+<p>其实在跟踪Handler机制运行流程源码的时候我们遇到过该函数的调用在Looper.loop（）函数中最后是会调用Message.recycleUnchecked()来回收Message。</p>
+<p><strong>Message类解析到此基本完成，总结一下就是Message主要承担了消息载体的作用，并且提供了obtain和recycle方法来获取和回收Message实例，毕竟Android系统是靠消息机制驱动的，当消息发送频繁时obtain和recycle可以有效提高效率节约资源。</strong></p>
+<h3 id="三、MessageQueue"><a href="#三、MessageQueue" class="headerlink" title="三、MessageQueue"></a>三、MessageQueue</h3><p>MessageQueue在整个Handler机制中主要作用就是根据Message的触发时间（Message.when字段）入队和出队。</p>
+<p><strong>1、构造函数及Filed</strong></p>
+<pre><code> public final class MessageQueue {
+        Message mMessages; //队首Message可以理解为头指针
+        private final ArrayList&lt;IdleHandler&gt; mIdleHandlers = new ArrayList&lt;IdleHandler&gt;(); //IdleHandler此处标注出来，后面会说
+        //唯一的构造函数
+        MessageQueue(boolean quitAllowed) {
+            mQuitAllowed = quitAllowed;//表示MessageQueue是否可退出
+            mPtr = nativeInit();//调用native 方法 此处暂时不做分析
+        }
+    }</code></pre><p>MessageQueue的构造函数比较简单，Filed我们只需要理解mMessages的作用就可以。关于IdleHandler，它是当MessageQueue为空或者空闲时会触发IdleHandler的queueIdle()方法，queueIdle会返回一个布尔值如果为false那么会移除对应的IdleHandler，否则在下次MessageQueue为空或者空闲时继续触发ueueIdle()。简单来说就是在MessageQueue没事做的时候触发完成一些操作，在LeakCanary，Glide等开源项目中都有用到。<a href="https://wetest.qq.com/lab/view/352.html" target="_blank" rel="noopener">具体可参考这篇文章，点我！！！</a></p>
+<p><strong>2、入队</strong></p>
+<pre><code>public final class MessageQueue {
+        boolean enqueueMessage(Message msg, long when) {
+            if (msg.target == null) { //msg的handler为空抛出异常
+                throw new IllegalArgumentException(&quot;Message must have a target.&quot;);
+            }
+            if (msg.isInUse()) {//当前msg正在被占用抛出异常
+                throw new IllegalStateException(msg + &quot; This message is already in use.&quot;);
+            }
+
+            synchronized (this) {
+                if (mQuitting) {
+                    IllegalStateException e = new IllegalStateException(
+                            msg.target + &quot; sending message to a Handler on a dead thread&quot;);
+                    Log.w(TAG, e.getMessage(), e);
+                    msg.recycle();
+                    return false;
+                }
+
+                msg.markInUse();//设置msg被占用
+                msg.when = when;//msg的触发时间
+                Message p = mMessages;//队首指针
+                boolean needWake;
+                if (p == null || when == 0 || when &lt; p.when) {
+                //此处对应的三个条件：p == null 表示queue为空、when == 0 表示该消息无延迟需要即刻触发、when &lt; p.when 表示该msg的触发时间早于队首msg的触发时间
+                以上三种情况下直接把msg放在队首
+                    // New head, wake up the event queue if blocked.
+                    msg.next = p;
+                    mMessages = msg;
+                    needWake = mBlocked;
+                } else {
+                //不满足上面三种情况 就要根据when（触发时间）插入到MessageQueue合适位置
+                    // Inserted within the middle of the queue.  Usually we don&#39;t have to wake
+                    // up the event queue unless there is a barrier at the head of the queue
+                    // and the message is the earliest asynchronous message in the queue.
+                    needWake = mBlocked &amp;&amp; p.target == null &amp;&amp; msg.isAsynchronous();
+                    Message prev;
+                    for (; ; ) {
+                        prev = p;
+                        p = p.next;
+                        if (p == null || when &lt; p.when) {
+                            break;
+                        }
+                        if (needWake &amp;&amp; p.isAsynchronous()) {
+                            needWake = false;
+                        }
+                    }
+                    msg.next = p; // invariant: p == prev.next
+                    prev.next = msg;
+                }
+
+                // We can assume mPtr != 0 because mQuitting is false.
+                if (needWake) {
+                    nativeWake(mPtr);
+                }
+            }
+            return true;
+        }
+
+    }
+</code></pre><p>入队的过程注释已经很清楚了，此处就不再赘述，相信你看完肯定会明白。</p>
+<p><strong>3、出队</strong></p>
+<pre><code>    public final class MessageQueue {
+       Message next() {
+        // Return here if the message loop has already quit and been disposed.
+        // This can happen if the application tries to restart a looper after quit
+        // which is not supported.
+        final long ptr = mPtr;
+        if (ptr == 0) {
+            return null;
+        }
+
+        int pendingIdleHandlerCount = -1; // -1 only during first iteration
+        int nextPollTimeoutMillis = 0;
+        for (;;) { //死循环
+            if (nextPollTimeoutMillis != 0) {
+                Binder.flushPendingCommands();
+            }
+
+            nativePollOnce(ptr, nextPollTimeoutMillis);
+
+            synchronized (this) {
+                // Try to retrieve the next message.  Return if found.
+                final long now = SystemClock.uptimeMillis(); //当前时刻据开机时间点的毫秒数
+                Message prevMsg = null;
+                Message msg = mMessages;//队首Message
+                if (msg != null &amp;&amp; msg.target == null) {
+                    // Stalled by a barrier.  Find the next asynchronous message in the queue.
+                    do {
+                        prevMsg = msg;
+                        msg = msg.next;
+                    } while (msg != null &amp;&amp; !msg.isAsynchronous());
+                }
+                if (msg != null) { //Message不为空
+                    if (now &lt; msg.when) { //未到触发时间
+                        // Next message is not ready.  Set a timeout to wake up when it is ready.
+                        nextPollTimeoutMillis = (int) Math.min(msg.when - now, Integer.MAX_VALUE);
+                    } else { 
+                        // Got a message. 从MessageQueue取出message，注意此处取出后消息队列会移除该Message，也就是该操作类似于pop
+                        mBlocked = false;
+                        if (prevMsg != null) {
+                            prevMsg.next = msg.next;
+                        } else {
+                            mMessages = msg.next;
+                        }
+                        msg.next = null;
+                        if (DEBUG) Log.v(TAG, &quot;Returning message: &quot; + msg);
+                        msg.markInUse();
+                        return msg; //返回取出的msg
+                    }
+                } else {
+                    // No more messages. MessageQueue没有message
+                    nextPollTimeoutMillis = -1;
+                }
+
+                // Process the quit message now that all pending messages have been handled.
+                if (mQuitting) {
+                    dispose();
+                    return null;
+                }
+
+                // If first time idle, then get the number of idlers to run.
+                // Idle handles only run if the queue is empty or if the first message
+                // in the queue (possibly a barrier) is due to be handled in the future.
+                if (pendingIdleHandlerCount &lt; 0
+                        &amp;&amp; (mMessages == null || now &lt; mMessages.when)) {
+                    pendingIdleHandlerCount = mIdleHandlers.size(); //此处获取已注册的IdleHandler
+                }
+                if (pendingIdleHandlerCount &lt;= 0) {
+                    // No idle handlers to run.  Loop and wait some more.
+                    mBlocked = true;
+                    continue;
+                }
+
+                if (mPendingIdleHandlers == null) {
+                    mPendingIdleHandlers = new IdleHandler[Math.max(pendingIdleHandlerCount, 4)];
+                }
+                mPendingIdleHandlers = mIdleHandlers.toArray(mPendingIdleHandlers);
+            }
+
+            // Run the idle handlers.
+            // We only ever reach this code block during the first iteration.
+            //遍历已注册的IdleHandler
+            for (int i = 0; i &lt; pendingIdleHandlerCount; i++) {
+                final IdleHandler idler = mPendingIdleHandlers[i];
+                mPendingIdleHandlers[i] = null; // release the reference to the handler
+
+                boolean keep = false;
+                try {
+                    keep = idler.queueIdle();//调用queueIdle()
+                } catch (Throwable t) {
+                    Log.wtf(TAG, &quot;IdleHandler threw exception&quot;, t);
+                }
+
+                if (!keep) {
+                    synchronized (this) {
+                        mIdleHandlers.remove(idler);
+                    }
+                }
+            }
+
+            // Reset the idle handler count to 0 so we do not run them again.
+            pendingIdleHandlerCount = 0;
+
+            // While calling an idle handler, a new message could have been delivered
+            // so go back and look again for a pending message without waiting.
+            nextPollTimeoutMillis = 0;
+        }
+    }
+    }</code></pre><p>可以看出出队操作就是循环取出队首message，然后判断是否到了触发时间，如果到了就取出message并返回<br>，直到队列为空。当队列空的时候就会去获取注册的IdHandler列表，然后依次遍历调用queueIdle()方法。</p>
+<p><strong>4、移除消息</strong></p>
+<pre><code>void removeMessages(Handler h, int what, Object object) {
+            if (h == null) {
+                return;
+            }
+
+            synchronized (this) {
+                Message p = mMessages;
+                //这里分两种情况进行分析：
+                //1、MessageQueue队首不是要移除的message 此时不满足注释1处的判断条件且p= mMessages,然后走到注释2处取下一个message并在
+                // 注释3处判断是否是要移除的message，如果是则移除 否则继续遍历队列下一个message直到队尾 。
+
+                //2、MessageQueue队首是要移除的message，此时满足注释1的条件，删除message 并取下一个message继续判断是否满足移除条件，直
+                // 到队列移动到队首message不满足移除条件。然后走到注释2处继续遍历剩下的message 如果有满足条件的 移除，否则循环遍历直至队尾。
+
+                // Remove all messages at front.
+                while (p != null &amp;&amp; p.target == h &amp;&amp; p.what == what
+                        &amp;&amp; (object == null || p.obj == object)) {//1
+                    Message n = p.next;
+                    mMessages = n;
+                    p.recycleUnchecked();//消息的回收是通过我们之前分析的recycleUnchecked()完成的
+                    p = n;
+                }
+
+                // Remove all messages after front.
+                while (p != null) { //2
+                    Message n = p.next;
+                    if (n != null) { //3
+                        if (n.target == h &amp;&amp; n.what == what
+                                &amp;&amp; (object == null || n.obj == object)) {
+                            Message nn = n.next;
+                            n.recycleUnchecked();
+                            p.next = nn;
+                            continue;
+                        }
+                    }
+                    p = n;
+                }
+            }
+        }
+
+        void removeCallbacksAndMessages(Handler h, Object object) {
+            if (h == null) {
+                return;
+            }
+
+            synchronized (this) {
+                Message p = mMessages;
+
+                // Remove all messages at front.
+                while (p != null &amp;&amp; p.target == h
+                        &amp;&amp; (object == null || p.obj == object)) {
+                    Message n = p.next;
+                    mMessages = n;
+                    p.recycleUnchecked();
+                    p = n;
+                }
+
+                // Remove all messages after front.
+                while (p != null) {
+                    Message n = p.next;
+                    if (n != null) {
+                        if (n.target == h &amp;&amp; (object == null || n.obj == object)) {
+                            Message nn = n.next;
+                            n.recycleUnchecked();
+                            p.next = nn;
+                            continue;
+                        }
+                    }
+                    p = n;
+                }
+            }
+        }
+
+    }</code></pre><p>实际上有很多移除的方式不过本质大多是一样的，所以此处只贴了其中的两个。移除操作在上面的注释已经解释的很清楚了，不懂得跟着注释和代码自己对一遍就明白了。</p>
+<h3 id="四、Looper"><a href="#四、Looper" class="headerlink" title="四、Looper"></a>四、Looper</h3><p><strong>1、构造函数和Filed</strong></p>
+<pre><code>  public final class Looper {
+        // sThreadLocal.get() will return null unless you&#39;ve called prepare().
+        static final ThreadLocal&lt;android.os.Looper&gt; sThreadLocal = new ThreadLocal&lt;android.os.Looper&gt;();//ThreadLocal是一个线程隔离的本地存储工具，此处使用ThreadLocal是用来存储Looper对象的
+        private static android.os.Looper sMainLooper;  // 主线程的Looper guarded by Looper.class
+
+        final MessageQueue mQueue; //Looper持有queue
+        final Thread mThread; //Looper所在线程
+
+        private Looper(boolean quitAllowed) {
+            mQueue = new MessageQueue(quitAllowed);
+            mThread = Thread.currentThread();
+        }
+    }</code></pre><p>Looper构造函数中new了一个Message并赋值给queue，另外还获取了当前所在线程。ThreadLocal是用来存储每个线程的Looper对象的，并且每个线程只能有一个Looper对象，Looper对象的存储和获取是通过下面方法完成的。有关ThreadLocal更深入的知识以后有时间在介绍。</p>
+<p>Looper创建、存储是通过prepare完成的，具体来说就是new一个Looper实例然后通过ThreadLocal的set方法存储起来。</p>
+<pre><code>public static void prepare() {
+        prepare(true);
+    }
+
+    private static void prepare(boolean quitAllowed) {
+        if (sThreadLocal.get() != null) {//每个线程只能有一个Looper 在prepare时会检测当前线程是否已经有了Looper 如果get()不为空 则抛出异常
+            throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);
+        }
+        sThreadLocal.set(new Looper(quitAllowed));
+    }
+</code></pre><p>Looper的获取则是在myLooper（），它是通过ThreadLocal<br>.get获取到的</p>
+<pre><code> public static @Nullable Looper myLooper() {
+        return sThreadLocal.get();
+    }</code></pre><p>此处需要注意的是在每个线程中在使用Handler发送message之前必须先调用Looper.prepaer(),并且在适当位置调用Looper.loop（）。</p>
+<p>比如这样</p>
+<pre><code>class LooperThread extends Thread {
+            public Handler mHandler;
+
+            public void run() {
+                Looper.prepare();
+
+                mHandler = new Handler() {
+                    public void handleMessage(Message msg) {
+                        // process incoming messages here
+                    }
+                };
+
+                Looper.loop();
+            }
+        }</code></pre><p>有人可能会疑惑主线程是什么时候调用 Looper.prepare()的。解释这个问题我们先来回想下一般我们写的Java程序是否都会有一个main函数作为入口，Android 石油Java实现的那这个入口在哪呢。</p>
+<p>浏览源码我们可知这个入口就是ActivityThread的main函数</p>
+<pre><code> public static void main(String[] args) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, &quot;ActivityThreadMain&quot;);
+
+        // CloseGuard defaults to true and can be quite spammy.  We
+        // disable it here, but selectively enable it later (via
+        // StrictMode) on debug builds, but using DropBox, not logs.
+        CloseGuard.setEnabled(false);
+
+        Environment.initForCurrentUser();
+
+        // Set the reporter for event logging in libcore
+        EventLogger.setReporter(new EventLoggingReporter());
+
+        // Make sure TrustedCertificateStore looks in the right place for CA certificates
+        final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
+        TrustedCertificateStore.setDefaultUserDirectory(configDir);
+
+        Process.setArgV0(&quot;&lt;pre-initialized&gt;&quot;);
+        //主线程looper
+        Looper.prepareMainLooper();
+        //创建主线程
+        ActivityThread thread = new ActivityThread();
+        //调用attach 创建application 
+        thread.attach(false);
+
+        if (sMainThreadHandler == null) {
+            sMainThreadHandler = thread.getHandler();
+        }
+
+        if (false) {
+            Looper.myLooper().setMessageLogging(new
+                    LogPrinter(Log.DEBUG, &quot;ActivityThread&quot;));
+        }
+        //为了便于理解 ，我们假定现在是从子线程发消息给主线程（UI线程）经过上面的分析此时Message已经从子线程发出并送到MessageQueue
+        //此时在主线程执行Looper.loop 便可以将MessageQueue中的Message取出并分发 loop首先获得一个 之后进入一个无限循环中 不断调用MessageQueue的next方法
+        //next方法的主要作用是从MessageQueue中取出Messade
+        //最后调用handler的dispatchMessage分发Message  在dispatchMessage方法中进行Message的处理 首先会判断该Message的callback是否为空
+        // 如果为空 则判断handler的callback是否为空 如果handler的callback为空才会执行handleMessage 该方法就是我们重写的handleMessage方法
+        // 至此我们回到主线程
+
+
+        // End of event ActivityThreadMain.
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        //开启looper
+        Looper.loop();
+
+        throw new RuntimeException(&quot;Main thread loop unexpectedly exited&quot;);
+    }
+</code></pre><p>我们看到在ActivityThread的main函数中先是调用了Looper.prepareMainLooper()准备好Looper，然后获取sMainThreadHandler（主线程Handler）最后调用了Looper.loop（）。所以我们在主线程无需自己手动prepare，Android系统已经帮我们prepare了。</p>
+<p><strong>2、loop</strong></p>
+<pre><code>public static void loop() {
+        final Looper me = myLooper(); //获取Looper对象
+        if (me == null) {
+            throw new RuntimeException(&quot;No Looper; Looper.prepare() wasn&#39;t called on this thread.&quot;);
+        }
+        final MessageQueue queue = me.mQueue;
+
+        // Make sure the identity of this thread is that of the local process,
+        // and keep track of what that identity token actually is.
+        Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
+
+        for (;;) { //死循环
+            Message msg = queue.next(); // might block 取一条message 这里可能会阻塞
+            if (msg == null) {
+                // No message indicates that the message queue is quitting.
+                return;
+            }
+
+            // This must be in a local variable, in case a UI event sets the logger
+            final Printer logging = me.mLogging;
+            if (logging != null) {
+                logging.println(&quot;&gt;&gt;&gt;&gt;&gt; Dispatching to &quot; + msg.target + &quot; &quot; +
+                        msg.callback + &quot;: &quot; + msg.what);
+            }
+
+            final long slowDispatchThresholdMs = me.mSlowDispatchThresholdMs;
+
+            final long traceTag = me.mTraceTag;
+            if (traceTag != 0 &amp;&amp; Trace.isTagEnabled(traceTag)) {
+                Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
+            }
+            final long start = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
+            final long end;
+            try {
+                msg.target.dispatchMessage(msg); //通过message持有的handler分发消息
+                end = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
+            } finally {
+                if (traceTag != 0) {
+                    Trace.traceEnd(traceTag);
+                }
+            }
+            if (slowDispatchThresholdMs &gt; 0) {
+                final long time = end - start;
+                if (time &gt; slowDispatchThresholdMs) {
+                    Slog.w(TAG, &quot;Dispatch took &quot; + time + &quot;ms on &quot;
+                            + Thread.currentThread().getName() + &quot;, h=&quot; +
+                            msg.target + &quot; cb=&quot; + msg.callback + &quot; msg=&quot; + msg.what);
+                }
+            }
+
+            if (logging != null) {
+                logging.println(&quot;&lt;&lt;&lt;&lt;&lt; Finished to &quot; + msg.target + &quot; &quot; + msg.callback);
+            }
+
+            // Make sure that during the course of dispatching the
+            // identity of the thread wasn&#39;t corrupted.
+            final long newIdent = Binder.clearCallingIdentity();
+            if (ident != newIdent) {
+                Log.wtf(TAG, &quot;Thread identity changed from 0x&quot;
+                        + Long.toHexString(ident) + &quot; to 0x&quot;
+                        + Long.toHexString(newIdent) + &quot; while dispatching to &quot;
+                        + msg.target.getClass().getName() + &quot; &quot;
+                        + msg.callback + &quot; what=&quot; + msg.what);
+            }
+
+            msg.recycleUnchecked(); //回收消息
+        }
+    }
+</code></pre><p>loop就是循环的取message然后分发出去，然后把消息回收。要注意的点就是queue.next()是可能会阻塞的。</p>
+<p><strong>以上就是Handler机制涉及的四个类，这里还是推荐大家看完文章自己在读一遍源码。下篇文章我会带大家手写一个简化版的Handler</strong></p>
+
+            <hr>
+          </div>
+          <br>
+          <div>
+            <div id="post-tag">
+              
+              <span>
+                <i class="iconfont icon-tag"></i>
+                
+                  <a class="hover-with-bg" href="/tags/Handler">Handler</a>
+                
+              </span>
+            </div>
+            
+              <div id="post-note">
+                <div><strong>本文作者：</strong><a href="/">myname</a></div>
+                <div><strong>本文链接：</strong><a href="http://yoursite.com/2019/08/11/Handler(%E4%BA%8C)/">http://yoursite.com/2019/08/11/Handler(%E4%BA%8C)/</a></div>
+                <div><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</div>
+              </div>
+            
+            
+              <div id="post-nav" class="container">
+                  <div class="row">
+                    
+                      <a href="/2019/08/22/Handler(%E4%B8%89)/" id="post-nav-prev" class="col">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="post-nav-title">Handler三部曲(三)</span>
+                      </a>
+                    
+                    
+                      <a href="/2019/07/29/Handler/" id="post-nav-next" class="col">
+                        <span class="post-nav-title">Handler三部曲(一)</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+            
+          </div>
+        </div>
+
+        <!-- custom -->
+        
+
+        <!-- Comments -->
+        <div class="col-lg-10 mx-auto nopadding-md">
+          <div class="container comments mx-auto" id="comments">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;ディレクトリ</p>
+    <div id="tocbot"></div>
+  </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+  </main>
+  
+<div id="sidebar" class="sidebar-hide">
+  <span class="sidebar-button sidebar-button-shift" id="toggle-sidebar" >
+    <i class="fa fa-arrow-right on" aria-hidden="true"></i>
+  </span>
+  <div class="sidebar-overlay"></div>
+  <div class="sidebar-intrude">
+    <div class="sidebar-avatar">
+      <img src="/img/favicon.png" srcset="/img/favicon.png" alt="avatar"/>
+    </div>
+    <div class="text-center sidebar-about">
+      <p class="h3 sidebar-author">Robin</p>
+      <p class="sidebar-subtitle"></p>
+      
+        <a href="https://github.com" class="h4" target="_blank">
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="https://twitter.com" class="h4" target="_blank">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="mailto:example@example.com" class="h4" target="_blank">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+    </div>
+    <div class="sidebar-friend">
+      <p class="h6 sidebar-friend-title">
+        <span class="sidebar-label-left"><i class="fas fa-user-friends"></i></span>
+        <span class="sidebar-label">友情链接</span>
+      </p>
+      <ul class="list-group">
+        
+          <a href="https://example.com/" target="_blank">
+            <li class="list-group-item">
+              <i class="fas fa-quote-left"></i>&nbsp;
+              friendname
+            </li>
+          </a>
+        
+    </ul>
+    </div>
+  </div>
+</div>
+
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">検索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">キーワード</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <div id="footerContent"  class="rgba-black-slight">
+<footer class="pt-5">
+  <div class="text-center py-3">
+  
+
+    
+      <div class="footer-copyright">
+        
+          ©2020&nbsp;robin
+        
+        
+          
+            <i class="iconfont icon-love"></i>
+          
+          <span>运转了<span id="runtime"></span>天</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+    
+  </div>
+</footer>
+</div>
+<!-- SCRIPTS -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js" ></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
+<script src="https://cdn.staticfile.org/mdbootstrap/4.8.9/js/mdb.min.js" ></script>
+<script src="/js/main.js" ></script>
+
+  <script src="/js/lazyload.js" ></script>
+
+
+  
+    <script src="https://cdn.staticfile.org/tocbot/4.8.0/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
+<!-- Plugins -->
+
+  <script src="https://cdn.staticfile.org/prettify/r298/prettify.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/typed.js/2.0.10/typed.min.js" ></script>
+  <script type="text/javascript">
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Handler三部曲(二)&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/anchor-js/4.2.0/anchor.min.js" ></script>
+  <script type="text/javascript">
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+  <script src="/js/local-search.js" ></script>
+  <script type="text/javascript">
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script type="text/javascript">
+  /* Fancybox */
+  var setupFancybox = function () {
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(function() {
+    var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      $(this).wrap(element);
+    });
+  };
+  setupFancybox();
+  </script>
+
+
+
+
+  <!-- 首页文章列表随机图片 -->
+  <script type="text/javascript">
+    $("img.image_random").each(function(){
+      
+        var xjhUrl = "//img.xjh.me/random_img.php?return=json";
+      
+      var _this = $(this);
+      $.get(xjhUrl,function(data,status){
+        if(status === "success"){
+          if(data.result === 200){
+            _this[0].src = data.img;
+          }
+        }
+      });
+    });
+  </script>
+
+
+
+
+  <script async src="//cdn.jsdelivr.net/npm/busuanzi@2.3.0/bsz.pure.mini.js" ></script>
+  
+
+
+  
+  
+    <script type="text/javascript">
+      //定义获取词语下标
+      var a_idx = 0;
+      jQuery(document).ready(function ($) {
+        //点击body时触发事件
+        $("body").click(function (e) {
+          //需要显示的词语
+          var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+          //设置词语给span标签
+          var $i = $("<span/>").text(a[a_idx]);
+          //下标等于原来下标+1  余 词语总数
+          a_idx = (a_idx + 1) % a.length;
+          //获取鼠标指针的位置，分别相对于文档的左和右边缘。
+          //获取x和y的指针坐标
+          var x = e.pageX, y = e.pageY;
+          //在鼠标的指针的位置给$i定义的span标签添加css样式
+          $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": rand_color()
+          });
+          // 随机颜色
+          function rand_color() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+          }
+          //在body添加这个标签
+          $("body").append($i);
+          //animate() 方法执行 CSS 属性集的自定义动画。
+          //该方法通过CSS样式将元素从一个状态改变为另一个状态。CSS属性值是逐渐改变的，这样就可以创建动画效果。
+          //详情请看http://www.w3school.com.cn/jquery/effect_animate.asp
+          $i.animate({
+            //将原来的位置向上移动180
+            "top": y - 180,
+            "opacity": 0
+            //1500动画的速度
+          }, 1500, function () {
+            //时间到了自动删除
+            $i.remove();
+          });
+        });
+      })
+      ;
+    </script>
+  
+
+
+<!-- Functions -->
+<script type="text/javascript">
+  /* 切换背景 */
+  
+    $("body").removeClass("banner-bg");
+    $("#background").addClass("banner-bg");
+    $('#mainContent').removeClass("rgba-black-slight");
+    $('#footerContent').removeClass("rgba-black-slight");
+    if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) || (/Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent))) {
+      $("#background").css("background-attachment", "scroll");
+    }
+  
+</script>
+
+  <script type="text/javascript">
+    /*显示博客运行时间*/
+    var blogRunTime = function () {
+      var runTime = document.getElementById("runtime");
+      var runtimeDate = "2019,04,20";
+	    var createDate = new Date(runtimeDate);
+	    var nowDate = new Date();
+	    var dateLine = nowDate.getTime() - createDate.getTime();
+	    var runDate = Math.floor(dateLine / (1000 * 60 * 60 * 24));
+	    runTime.innerHTML = runDate;
+    };
+    $(document).ready(function(){
+	    blogRunTime();
+    });
+  </script>
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+  
+</body>
+</html>

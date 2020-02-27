@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="author" content="robin">
+  
+    <meta name="description" content="导读：通过以上两篇文章相信你已经对Handler有了一个清晰的了解，为了学以致用这篇文章我们就来手写一个简化版的Handler。">
+  
+  
+    <meta name="keywords" content="Handler," />
+  
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <title>Handler三部曲(三) ~ Robin</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.10.2/css/all.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.8.9/css/mdb.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css"  >
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+  <link rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css"  >
+
+
+  <link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"  >
+
+<link rel="stylesheet" href="/css/main.css"  >
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+  <style type="text/css">
+    .banner-bg {
+      
+        background-image: url('/img/default.png');
+      
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  </style>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="banner-bg">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Robin</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">主页</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/reading/">读书</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/photo/">相册</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">归档</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">标签</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+</nav>
+
+    <div class="view intro-2 rgba-black-slight" id="background">
+      <div class="full-bg-img">
+        <div class="mask flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+            
+              <br>
+              <p class="mt-3">
+                <i class="far fa-calendar-alt"></i>
+                <span class="post-date">2019-08-22&nbsp;|&nbsp;</span>
+                <i class="far fa-chart-bar"></i>
+                <span class="post-count">1.8k</span>字&nbsp;|&nbsp;
+                <i class="far fa-clock"></i>
+                <span class="post-count">9</span>分钟
+                
+                  <span id="busuanzi_container_page_pv" style="display:none">
+                    &nbsp;|&nbsp;
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv"></span>次
+                  </span>
+                
+              </p>
+            
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="rgba-black-slight">
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto" id="post">
+          <div class="markdown-body">
+            <p>导读：通过以上两篇文章相信你已经对Handler有了一个清晰的了解，为了学以致用这篇文章我们就来手写一个简化版的Handler。</p>
+<a id="more"></a>
+
+
+<h1 id="Handler三部曲（三）"><a href="#Handler三部曲（三）" class="headerlink" title="Handler三部曲（三）"></a>Handler三部曲（三）</h1><p>先来写Handler类</p>
+<pre><code>public class HandlerLite {
+    private static final String TAG = &quot;HandlerLite&quot;;
+    Runnable callback;
+    private Looper myLooper;
+    private MessageQueue mQueue;
+    private Callback mCallback;
+
+    /**
+     * 构造函数
+     */
+    public HandlerLite() {
+        this(null);
+    }
+
+    /**
+     * @param callback
+     */
+    public HandlerLite(Callback callback) {
+        //获取looper实例
+        myLooper = Looper.myLooper();
+        if (myLooper == null) {
+            throw new RuntimeException(
+                    &quot;Can&#39;t create handler inside thread that has not called Looper.prepare()&quot;);
+        }
+        mQueue = myLooper.mQueue;
+        mCallback = callback;
+    }
+
+    /**
+     * 从message缓存池中获取一个message 推荐用此方法获取message实例或者直接调用Message.obtain()
+     *
+     * @return
+     */
+    public Message obtainMessage() {
+        return Message.obtain();
+    }
+
+    public final boolean sendMessage(Message msg) {
+        return sendMessageDelayed(msg, 0);
+    }
+
+    private boolean sendMessageDelayed(Message msg, long delay) {
+        if (delay &lt; 0) {
+            delay = 0;
+        }
+        return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delay);
+    }
+
+    public final boolean sendMessageAtTime(Message msg, long delay) {
+        MessageQueue messageQueue = mQueue;
+        if (messageQueue == null) {
+            RuntimeException e = new RuntimeException(this + &quot; sendMessageAtTime() called with no mQueue&quot;);
+            Log.w(&quot;Looper&quot;, e.getMessage(), e);
+            return false;
+
+        }
+        return enQueueMessage(messageQueue, msg, delay);
+    }
+
+    private boolean enQueueMessage(MessageQueue messageQueue, Message msg, long delay) {
+        msg.target = this;
+        return messageQueue.enQueueMessage(msg, delay);
+    }
+
+    public final boolean post(Runnable r) {
+        return sendMessageDelayed(getPostMessage(r), 0);
+    }
+
+    private static Message getPostMessage(Runnable r) {
+        Message m = Message.obtain();
+        m.callback = r;
+        return m;
+    }
+
+    public final boolean postDelayed(Runnable r, long delayMillis) {
+        return sendMessageDelayed(getPostMessage(r), delayMillis);
+    }
+
+    public void dispatchMessage(Message msg) {
+        if (msg.callback != null) {
+            handleCallback(msg);
+        } else {
+            if (mCallback != null) {
+                if (mCallback.handleMessage(msg)) {
+                    return;
+                }
+            }
+            handleMessage(msg);
+        }
+    }
+
+    /**
+     *
+     * @param msg
+     */
+    public void handleMessage(Message msg) {
+
+    }
+
+    private static void handleCallback(Message message) {
+        message.callback.run();
+    }
+
+    /**
+     * @param message
+     * @return mesage name if callback is not null return the class name of the
+     * message callback else return he hexadecimal representation of the
+     * message &quot;what&quot; field.
+     */
+    public String getMessageName(Message message) {
+        if (message.callback != null) {
+            return message.callback.getClass().getName();
+        }
+        return &quot;0x&quot; + Integer.toHexString(message.what);
+    }
+
+    /**
+     * handler 回调
+     */
+    public interface Callback {
+        public boolean handleMessage(Message msg);
+    }
+}
+</code></pre><p>HandlerLite对应Handler类，我们提供了两个构造函数，用来初始化myLooper、mQueue、mCallback等filed。<br>之后提供一个obtainMessage方法来获取message。之后提供了sendMessage和post等方法发送消息。之后dispatchMessage方法用来分发处理收到的Message。同时我们也给HandlerLite提供了一个Callback，我们可以通过重写handleMessage或者实现Callback来处理Message。</p>
+<p>总体来看HandlerLite就是一个简化的Handler并没有很大改动。</p>
+<p>下面是Looper类</p>
+<pre><code>public class Looper {
+
+    static final ThreadLocal&lt;Looper&gt; sThreadLocal = new ThreadLocal&lt;Looper&gt;();
+    MessageQueue mQueue;
+
+    public Looper() {
+        mQueue = new MessageQueue();
+    }
+
+    public static void prepare() {
+        if (sThreadLocal.get() != null) {
+            throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);
+        }
+        sThreadLocal.set(new Looper());
+    }
+
+    public static void loop() {
+        final Looper me = myLooper();
+        if (me == null) {
+            throw new RuntimeException(&quot;No Looper; Looper.prepare() wasn&#39;t called on this thread.&quot;);
+        }
+        final MessageQueue queue = me.mQueue;
+
+        for (; ; ) {
+            Message msg = queue.next();
+            if (msg == null) {
+                return;
+            }
+            msg.target.dispatchMessage(msg);
+        }
+
+    }
+
+    public static Looper myLooper() {
+        return sThreadLocal.get();
+    }
+
+    public void quit() {
+        mQueue.quit(false);
+    }
+
+    public void quitSafely() {
+        mQueue.quit(true);
+    }
+
+}
+</code></pre><p>可以看出Looper类很简短，我们重点关注loop和prepare函数即可。prepare函数就是new一个新的Looper并保存在当前线程的ThreadLocal中，这样就保证了每个Thread有且仅有一个Looper。而loop是让整个Handler消息机制运转的关键，它会不断的从MessageQueue中取出消息并通过Message持有的Handler进行分发。</p>
+<p>接下来是Message类</p>
+<pre><code>public class Message {
+
+    public int what;
+    public int arg1;
+    public int arg2;
+    public Object obj;
+
+    //
+
+    public long when;
+    public int flags;
+    HandlerLite target;
+    private static final Object sPoolSync = new Object();
+    private static Message sPool;
+    Message next;
+    private static int sPoolSize = 0;
+    static final int FLAG_IN_USE = 1 &lt;&lt; 0;
+    Runnable callback;
+    private static final int MAX_POOL_SIZE = 50;
+
+    private static boolean gCheckRecycle = true;
+
+    public Message() {
+    }
+
+    public static Message obtain(){
+        synchronized (sPoolSync) {
+            if (sPool != null) {
+                Message m = sPool;
+                sPool = m.next;
+                m.next = null;
+                m.flags = 0; // clear in-use flag
+                sPoolSize--;
+                return m;
+            }
+        }
+        return new Message();
+
+    }
+
+    public HandlerLite getTarget() {
+        return target;
+    }
+
+    public void setTarget(HandlerLite target) {
+        this.target = target;
+    }
+
+    /*package*/ boolean isInUse() {
+        return ((flags &amp; FLAG_IN_USE) == FLAG_IN_USE);
+    }
+
+    /*package*/ void markInUse() {
+        flags |= FLAG_IN_USE;
+    }
+
+    public void recycle() {
+        if (isInUse()) {
+            if (gCheckRecycle) {
+                throw new IllegalStateException(&quot;This message cannot be recycled because it &quot;
+                        + &quot;is still in use.&quot;);
+            }
+            return;
+        }
+        recycleUnchecked();
+    }
+
+    void recycleUnchecked() {
+        // Mark the message as in use while it remains in the recycled object pool.
+        // Clear out all other details.
+        flags = FLAG_IN_USE;
+        what = 0;
+        arg1 = 0;
+        arg2 = 0;
+        obj = null;
+        when = 0;
+        target = null;
+        callback = null;
+
+        synchronized (sPoolSync) {
+            if (sPoolSize &lt; MAX_POOL_SIZE) {
+                next = sPool;
+                sPool = this;
+                sPoolSize++;
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return &quot;Message{&quot; +
+                &quot;what=&quot; + what +
+                &quot;, arg1=&quot; + arg1 +
+                &quot;, arg2=&quot; + arg2 +
+                &quot;, obj=&quot; + obj.toString() +
+                &quot;, when=&quot; + when +
+                &quot;, flags=&quot; + flags +
+                &quot;, target=&quot; + target +
+                &#39;}&#39;;
+    }
+}
+</code></pre><p>Message主要功能就是作为消息的载体并且提供了一个消息缓冲池，用来缓存Message 通过obtain方法我们可以获得缓冲池中的空闲Messag。同时它也提供了回收消息的方法recycleUnchecked，该方法会clear Message 的字段并放入消息缓冲池中。</p>
+<p>最后就是MessageQueue了</p>
+<pre><code>public class MessageQueue {
+    Message mMessages;
+
+    public MessageQueue() {
+
+    }
+
+    public Message next() {
+        int nextPollTimeoutMillis = 0;
+        for (; ; ) {
+            synchronized (this) {
+                final long now = SystemClock.uptimeMillis();
+                Message prevMsg = null;
+                Message msg = mMessages;
+                if (msg != null &amp;&amp; msg.target == null) {
+                    Log.i(TAG, &quot;next: &quot; + msg.target);
+                    do {
+                        prevMsg = msg;
+                        msg = msg.next;
+                    } while (msg != null);
+                }
+                if (msg != null) {
+                    if (now &lt; msg.when) {
+                        nextPollTimeoutMillis = (int) Math.min(msg.when - now, Integer.MAX_VALUE);
+                    } else {
+
+                        if (prevMsg != null) {
+                            Log.i(TAG, &quot;next pre: &quot; + prevMsg.toString());
+                            prevMsg.next = msg.next;
+                        } else {
+                            mMessages = msg.next;
+                        }
+                        msg.next = null;
+                        msg.markInUse();
+                        Log.i(TAG, &quot;next: &quot; + msg.toString());
+                        return msg;
+                    }
+                } else {
+                    // No more messages.
+                    nextPollTimeoutMillis = -1;
+                }
+            }
+        }
+
+    }
+
+    public boolean enQueueMessage(Message msg, long when) {
+        if (msg.target == null) {
+            throw new IllegalArgumentException(&quot;Message must have a target.&quot;);
+        }
+        if (msg.isInUse()) {
+            throw new IllegalStateException(msg + &quot; This message is already in use.&quot;);
+        }
+        synchronized (this) {
+            msg.markInUse();
+            msg.when = when;
+            Message p = mMessages;
+            if (p == null || when == 0 || when &lt; p.when) {
+                msg.next = p;
+                mMessages = msg;
+            } else {
+                Message prev;
+                for (; ; ) {
+                    prev = p;
+                    p = p.next;
+                    if (p == null || when &lt; p.when) {
+                        break;
+                    }
+                }
+                msg.next = p; // invariant: p == prev.next
+                prev.next = msg;
+            }
+        }
+        return true;
+    }
+
+    void quit(boolean safe) {
+
+        synchronized (this) {
+
+            if (safe) {
+                removeAllFutureMessagesLocked();
+            } else {
+                removeAllMessagesLocked();
+            }
+        }
+    }
+
+    private void removeAllFutureMessagesLocked() {
+        final long now = SystemClock.uptimeMillis();
+        Message p = mMessages;
+        if (p != null) {
+            if (p.when &gt; now) {
+                removeAllMessagesLocked();
+            } else {
+                Message n;
+                for (; ; ) {
+                    n = p.next;
+                    if (n == null) {
+                        return;
+                    }
+                    if (n.when &gt; now) {
+                        break;
+                    }
+                    p = n;
+                }
+                p.next = null;
+                do {
+                    p = n;
+                    n = p.next;
+                    p.recycleUnchecked();
+                } while (n != null);
+            }
+        }
+    }
+
+    private void removeAllMessagesLocked() {
+        Message p = mMessages;
+        while (p != null) {
+            Message n = p.next;
+            p.recycleUnchecked();
+            p = n;
+        }
+        mMessages = null;
+    }
+
+    void removeCallbacksAndMessages(HandlerLite h, Object object) {
+        if (h == null) {
+            return;
+        }
+
+        synchronized (this) {
+            Message p = mMessages;
+
+            // Remove all messages at front.
+            while (p != null &amp;&amp; p.target == h
+                    &amp;&amp; (object == null || p.obj == object)) {
+                Message n = p.next;
+                mMessages = n;
+                p.recycleUnchecked();
+                p = n;
+            }
+
+            // Remove all messages after front.
+            while (p != null) {
+                Message n = p.next;
+                if (n != null) {
+                    if (n.target == h &amp;&amp; (object == null || n.obj == object)) {
+                        Message nn = n.next;
+                        n.recycleUnchecked();
+                        p.next = nn;
+                        continue;
+                    }
+                }
+                p = n;
+            }
+        }
+    }
+}
+</code></pre><p>MessageQueue是一个由链表实现的消息队列，Handler发送的消息都会存放到该队列中等待Looper取出。所以我们需要关注它的enQueueMessage和next，要熟悉并掌握对入队和出队过程。</p>
+<p>至此我们简化版的Handler就完成了下面我们来测试下它是否能正常运行。</p>
+<p>首先我们在项目的ExampleInstrumentedTest类的TestHandlerLite方法中调用Looper.prepare(); 即创建looper。<br>之后我们new 一个HandlerLite 并重写handleMessage方法在其中打印当前线程和发送消息的线程。</p>
+<pre><code> final HandlerLite handlerLite=new HandlerLite(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                System.out.println(&quot;当前线程：&quot;+Thread.currentThread().getName()+&quot; 消息线程：   &quot;+msg.obj);
+            }
+        };</code></pre><p>然后new Thread 在run方法中通过obtain方法获取一个message并且其obj字段中存放的是当前线程名称然后通过handlerlite发送。</p>
+<pre><code> new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    Message message = handlerLite.obtainMessage();
+
+                    message.obj = Thread.currentThread().getName();
+                    handlerLite.sendMessage(message);
+                }
+
+            }
+        }).start();</code></pre><p>最后一步就是在函数尾部调用Looper.loop 来让整个消息机制运转起来。</p>
+<p>通过log我们可以看到消息是跨线程的。</p>
+<pre><code>I/System.out: 当前线程：Instr: android.support.test.runner.AndroidJUnitRunner 消息线程：   Thread-2</code></pre><p>由此可以验证我们的简化版Handler运转正常。</p>
+<p>最后贴下完整的验证代码</p>
+<pre><code>public void TestHandlerLite() {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getTargetContext();
+
+        assertEquals(&quot;com.robin.handlerlite&quot;, appContext.getPackageName());
+
+
+        Looper.prepare();
+        final HandlerLite handlerLite=new HandlerLite(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                System.out.println(&quot;当前线程：&quot;+Thread.currentThread().getName()+&quot; 消息线程：   &quot;+msg.obj);
+            }
+        };
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    Message message = handlerLite.obtainMessage();
+
+                    message.obj = Thread.currentThread().getName();
+                    handlerLite.sendMessage(message);
+                }
+
+            }
+        }).start();
+
+        Looper.loop();
+    }</code></pre><p><a href="https://github.com/Robin132929/HandlerLite" target="_blank" rel="noopener">项目地址</a></p>
+
+            <hr>
+          </div>
+          <br>
+          <div>
+            <div id="post-tag">
+              
+              <span>
+                <i class="iconfont icon-tag"></i>
+                
+                  <a class="hover-with-bg" href="/tags/Handler">Handler</a>
+                
+              </span>
+            </div>
+            
+              <div id="post-note">
+                <div><strong>本文作者：</strong><a href="/">myname</a></div>
+                <div><strong>本文链接：</strong><a href="http://yoursite.com/2019/08/22/Handler(%E4%B8%89)/">http://yoursite.com/2019/08/22/Handler(%E4%B8%89)/</a></div>
+                <div><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</div>
+              </div>
+            
+            
+              <div id="post-nav" class="container">
+                  <div class="row">
+                    
+                      <a href="/2019/09/10/Activity/" id="post-nav-prev" class="col">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="post-nav-title">Activity知识架构图</span>
+                      </a>
+                    
+                    
+                      <a href="/2019/08/11/Handler(%E4%BA%8C)/" id="post-nav-next" class="col">
+                        <span class="post-nav-title">Handler三部曲(二)</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+            
+          </div>
+        </div>
+
+        <!-- custom -->
+        
+
+        <!-- Comments -->
+        <div class="col-lg-10 mx-auto nopadding-md">
+          <div class="container comments mx-auto" id="comments">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;ディレクトリ</p>
+    <div id="tocbot"></div>
+  </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+  </main>
+  
+<div id="sidebar" class="sidebar-hide">
+  <span class="sidebar-button sidebar-button-shift" id="toggle-sidebar" >
+    <i class="fa fa-arrow-right on" aria-hidden="true"></i>
+  </span>
+  <div class="sidebar-overlay"></div>
+  <div class="sidebar-intrude">
+    <div class="sidebar-avatar">
+      <img src="/img/favicon.png" srcset="/img/favicon.png" alt="avatar"/>
+    </div>
+    <div class="text-center sidebar-about">
+      <p class="h3 sidebar-author">Robin</p>
+      <p class="sidebar-subtitle"></p>
+      
+        <a href="https://github.com" class="h4" target="_blank">
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="https://twitter.com" class="h4" target="_blank">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="mailto:example@example.com" class="h4" target="_blank">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+    </div>
+    <div class="sidebar-friend">
+      <p class="h6 sidebar-friend-title">
+        <span class="sidebar-label-left"><i class="fas fa-user-friends"></i></span>
+        <span class="sidebar-label">友情链接</span>
+      </p>
+      <ul class="list-group">
+        
+          <a href="https://example.com/" target="_blank">
+            <li class="list-group-item">
+              <i class="fas fa-quote-left"></i>&nbsp;
+              friendname
+            </li>
+          </a>
+        
+    </ul>
+    </div>
+  </div>
+</div>
+
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">検索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">キーワード</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <div id="footerContent"  class="rgba-black-slight">
+<footer class="pt-5">
+  <div class="text-center py-3">
+  
+
+    
+      <div class="footer-copyright">
+        
+          ©2020&nbsp;robin
+        
+        
+          
+            <i class="iconfont icon-love"></i>
+          
+          <span>运转了<span id="runtime"></span>天</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+    
+  </div>
+</footer>
+</div>
+<!-- SCRIPTS -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js" ></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
+<script src="https://cdn.staticfile.org/mdbootstrap/4.8.9/js/mdb.min.js" ></script>
+<script src="/js/main.js" ></script>
+
+  <script src="/js/lazyload.js" ></script>
+
+
+  
+    <script src="https://cdn.staticfile.org/tocbot/4.8.0/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
+<!-- Plugins -->
+
+  <script src="https://cdn.staticfile.org/prettify/r298/prettify.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/typed.js/2.0.10/typed.min.js" ></script>
+  <script type="text/javascript">
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Handler三部曲(三)&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/anchor-js/4.2.0/anchor.min.js" ></script>
+  <script type="text/javascript">
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+  <script src="/js/local-search.js" ></script>
+  <script type="text/javascript">
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script type="text/javascript">
+  /* Fancybox */
+  var setupFancybox = function () {
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(function() {
+    var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      $(this).wrap(element);
+    });
+  };
+  setupFancybox();
+  </script>
+
+
+
+
+  <!-- 首页文章列表随机图片 -->
+  <script type="text/javascript">
+    $("img.image_random").each(function(){
+      
+        var xjhUrl = "//img.xjh.me/random_img.php?return=json";
+      
+      var _this = $(this);
+      $.get(xjhUrl,function(data,status){
+        if(status === "success"){
+          if(data.result === 200){
+            _this[0].src = data.img;
+          }
+        }
+      });
+    });
+  </script>
+
+
+
+
+  <script async src="//cdn.jsdelivr.net/npm/busuanzi@2.3.0/bsz.pure.mini.js" ></script>
+  
+
+
+  
+  
+    <script type="text/javascript">
+      //定义获取词语下标
+      var a_idx = 0;
+      jQuery(document).ready(function ($) {
+        //点击body时触发事件
+        $("body").click(function (e) {
+          //需要显示的词语
+          var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+          //设置词语给span标签
+          var $i = $("<span/>").text(a[a_idx]);
+          //下标等于原来下标+1  余 词语总数
+          a_idx = (a_idx + 1) % a.length;
+          //获取鼠标指针的位置，分别相对于文档的左和右边缘。
+          //获取x和y的指针坐标
+          var x = e.pageX, y = e.pageY;
+          //在鼠标的指针的位置给$i定义的span标签添加css样式
+          $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": rand_color()
+          });
+          // 随机颜色
+          function rand_color() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+          }
+          //在body添加这个标签
+          $("body").append($i);
+          //animate() 方法执行 CSS 属性集的自定义动画。
+          //该方法通过CSS样式将元素从一个状态改变为另一个状态。CSS属性值是逐渐改变的，这样就可以创建动画效果。
+          //详情请看http://www.w3school.com.cn/jquery/effect_animate.asp
+          $i.animate({
+            //将原来的位置向上移动180
+            "top": y - 180,
+            "opacity": 0
+            //1500动画的速度
+          }, 1500, function () {
+            //时间到了自动删除
+            $i.remove();
+          });
+        });
+      })
+      ;
+    </script>
+  
+
+
+<!-- Functions -->
+<script type="text/javascript">
+  /* 切换背景 */
+  
+    $("body").removeClass("banner-bg");
+    $("#background").addClass("banner-bg");
+    $('#mainContent').removeClass("rgba-black-slight");
+    $('#footerContent').removeClass("rgba-black-slight");
+    if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) || (/Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent))) {
+      $("#background").css("background-attachment", "scroll");
+    }
+  
+</script>
+
+  <script type="text/javascript">
+    /*显示博客运行时间*/
+    var blogRunTime = function () {
+      var runTime = document.getElementById("runtime");
+      var runtimeDate = "2019,04,20";
+	    var createDate = new Date(runtimeDate);
+	    var nowDate = new Date();
+	    var dateLine = nowDate.getTime() - createDate.getTime();
+	    var runDate = Math.floor(dateLine / (1000 * 60 * 60 * 24));
+	    runTime.innerHTML = runDate;
+    };
+    $(document).ready(function(){
+	    blogRunTime();
+    });
+  </script>
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+  
+</body>
+</html>

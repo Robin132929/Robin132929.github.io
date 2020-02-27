@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="author" content="robin">
+  
+  
+    <meta name="keywords" content="Handler," />
+  
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <title>Handler三部曲(一) ~ Robin</title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.10.2/css/all.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/mdbootstrap/4.8.9/css/mdb.min.css"  >
+<link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/3.0.1/github-markdown.min.css"  >
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1067060_qzomjdt8bmp.css">
+
+
+  <link rel="stylesheet" href="/lib/prettify/tomorrow-night-eighties.min.css"  >
+
+
+  <link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"  >
+
+<link rel="stylesheet" href="/css/main.css"  >
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+  <style type="text/css">
+    .banner-bg {
+      
+        background-image: url('/img/default.png');
+      
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  </style>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="banner-bg">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Robin</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">主页</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/reading/">读书</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/photo/">相册</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">归档</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">标签</a>
+          </li>
+        
+          
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+</nav>
+
+    <div class="view intro-2 rgba-black-slight" id="background">
+      <div class="full-bg-img">
+        <div class="mask flex-center">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
+            
+              <br>
+              <p class="mt-3">
+                <i class="far fa-calendar-alt"></i>
+                <span class="post-date">2019-07-29&nbsp;|&nbsp;</span>
+                <i class="far fa-chart-bar"></i>
+                <span class="post-count">2.4k</span>字&nbsp;|&nbsp;
+                <i class="far fa-clock"></i>
+                <span class="post-count">10</span>分钟
+                
+                  <span id="busuanzi_container_page_pv" style="display:none">
+                    &nbsp;|&nbsp;
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv"></span>次
+                  </span>
+                
+              </p>
+            
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="mainContent" class="rgba-black-slight">
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto" id="post">
+          <div class="markdown-body">
+            <h1 id="Handler三部曲（一）"><a href="#Handler三部曲（一）" class="headerlink" title="Handler三部曲（一）"></a>Handler三部曲（一）</h1><p>Handler是Android重要的消息分发机制，这就要求我们不仅会正确使用更要了解熟悉其内部实现。该系列共分为三步：</p>
+<p>1、首先带大家了解Handler的基本使用以及Handler消息分发流程的源码，这可以帮助我们对Handler机制有一个大致了解。</p>
+<p>2、然后是详细的解析Handler机制涉及的四个类帮我们更加深入了解Handler机制。</p>
+<p>3、最后就是动手实践。网上大多数文章只是带大家分析源码，俗话说纸上得来终觉浅所以我会带大家手写一个简略版的Handler。</p>
+<p><strong>阅读建议：推荐看完前两步之后自己独立的去阅读一遍源码，然后再看第三步手写Handler</strong></p>
+<p>本篇文章是Hadler三部曲的第一步，主要是介绍Handler的基本使用以及Handler消息分发流程的源码让大家对Handler有一个基本的认识。</p>
+<h3 id="一、Handler使用"><a href="#一、Handler使用" class="headerlink" title="一、Handler使用"></a>一、Handler使用</h3><p>一般使用流程如下：</p>
+<pre><code>//首先获取一个handler并重写handleMessage方法 此处打印当前线程名以及消息来源线程名
+public Handler handler = new Handler() {
+@Override
+public void handleMessage(Message msg) {
+super.handleMessage(msg);
+// do something...
+switch (msg.what) {
+case 10000:
+Log.i(TAG, &quot;handleMessage: &quot; + &quot;当前线程：&quot; + Thread.currentThread().getName() + &quot;   获得 &quot; + msg.obj.toString() + &quot; 线程传来的消息&quot;);
+break;
+default:
+break;
+}
+}
+};
+
+//在子线程发送message
+new Thread(new Runnable() {
+@Override
+public void run() {
+Object obj = Thread.currentThread().getName();
+Message msg = handler.obtainMessage(10000, obj);
+handler.sendMessage(msg); 
+}
+}).start();
+
+//还可以使用post（postdelay）
+handler.post(new Runnable() {
+@Override
+public void run() {
+//此处打印当前线程
+Log.i(TAG, &quot;post: &quot; + &quot;当前线程：&quot; + Thread.currentThread().getName());
+}
+});
+</code></pre><p>++注：上面写法实际是存在内存泄漏的风险的，后面会讲++</p>
+<p>由上面代码可知handler主要有两个用途：</p>
+<p>1、让message或runnable在将来某个时刻执行</p>
+<p>2、在与自己不同的线程执行某种操作</p>
+<h3 id="二、Handler-解析"><a href="#二、Handler-解析" class="headerlink" title="二、Handler 解析"></a>二、Handler 解析</h3><h5 id="Handler涉及的四个主要类"><a href="#Handler涉及的四个主要类" class="headerlink" title="Handler涉及的四个主要类"></a>Handler涉及的四个主要类</h5><ul>
+<li>Handler 线程间通信的工具类 可以用来发送消息或任务</li>
+<li>Message 要发送的消息或任务</li>
+<li>MessageQueue 存放Message的队列 实际是一个链表结构</li>
+<li>Looper 类似一个轮询器 不断的从MessageQueue中取Message并分发</li>
+</ul>
+<h5 id="Handler-执行流程源码解析"><a href="#Handler-执行流程源码解析" class="headerlink" title="Handler 执行流程源码解析"></a>Handler 执行流程源码解析</h5><p><strong>源码解析</strong>：我们以sendMessage方法为入口跟进源码</p>
+<p><strong>1.sendMessage调用sendMessageDelayed并将msg 和0 传入</strong></p>
+<pre><code>public final boolean sendMessage(Message msg)
+{
+return sendMessageDelayed(msg, 0);
+}</code></pre><p><strong>2.sendMessageDelayed 对传入的delayMillis做了下判断 如果小于0 则默认为0。 此处的delayMillis其实就是该消息发出时间 最后调用sendMessageAtTime 此处的SystemClock.uptimeMillis()代表从开机到当前时刻的毫秒数</strong></p>
+<pre><code>public final boolean sendMessageDelayed(Message msg, long delayMillis)
+{
+if (delayMillis &lt; 0) {
+delayMillis = 0;
+}
+return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis); 
+}</code></pre><p><strong>3.handler其实提供了很多种发送message的方法。（如post等等） 它们最终会走到sendMessageAtTime函数这里 我们看到它首先判断了queue是否为空，即mQueue是否为空，mQueue赋值是在调用Handler时赋值的。然后该方法最终会调用enqueueMessage方法</strong></p>
+<pre><code>public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
+MessageQueue queue = mQueue;
+if (queue == null) {
+RuntimeException e = new RuntimeException(
+this + &quot; sendMessageAtTime() called with no mQueue&quot;);
+Log.w(&quot;Looper&quot;, e.getMessage(), e);
+return false;
+}
+return enqueueMessage(queue, msg, uptimeMillis);
+}</code></pre><p><strong>4.enqueueMessage最终会将发送的message送入MessageQueue</strong></p>
+<pre><code>private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
+msg.target = this;
+if (mAsynchronous) {
+msg.setAsynchronous(true);
+}
+return queue.enqueueMessage(msg, uptimeMillis);
+}</code></pre><p><strong>5.MessageQueue实际是一个链表结构，MessageQueue中有个mMessages变量 它本身是一个Message实例 定义这样一个变量的作用是标识MessageQueue位于表头的Message。 在enqueueMessage方法中 将mMessages赋值给p 此时p即代表了链表头的message 然后会对p做一些判断 即是否为空（如为空则说明此时MessageQueue为空）、when是否为0（如为0代表该消息无需延迟发出）、传入的message的when时间是否早于当前链表头message的when时间 如果满足上述条件之一则将传入的msg插入链表头 否则就会遍历MessageQueue链表根据when属性找到 msg在链表中的合适位置并插入链表 至此message的“入队操作完成”</strong></p>
+<pre><code>boolean enqueueMessage(Message msg, long when) {
+//...
+msg.markInUse();
+msg.when = when;
+Message p = mMessages;
+boolean needWake;
+if (p == null || when == 0 || when &lt; p.when) {
+// New head, wake up the event queue if blocked.
+msg.next = p;
+mMessages = msg;
+needWake = mBlocked;
+} else {
+// Inserted within the middle of the queue.  Usually we don&#39;t have to wake
+// up the event queue unless there is a barrier at the head of the queue
+// and the message is the earliest asynchronous message in the queue.
+needWake = mBlocked &amp;&amp; p.target == null &amp;&amp; msg.isAsynchronous();
+Message prev;
+for (;;) {
+prev = p;
+p = p.next;
+if (p == null || when &lt; p.when) {
+break;
+}
+if (needWake &amp;&amp; p.isAsynchronous()) {
+needWake = false;
+}
+}
+msg.next = p; // invariant: p == prev.next
+prev.next = msg;
+}
+
+// We can assume mPtr != 0 because mQuitting is false.
+if (needWake) {
+nativeWake(mPtr);
+}
+}
+return true;
+}
+</code></pre><p><strong>6.Message的发送和“入队”操作均完成后就是Message的“出队”以及分发。该操作是由Looper完成的，下面我们来分析Looper是如何将消息从MessageQueue中取出并将消息分发的 实际上是通过Looper.loop（）来实现Message出队和分发。下面我们一起来看下loop方法 首先它会调用myLooper方法获取一个looper对象（详见7） 然后会进入一个死循环中 不断的调用queue.next（详见8）从MessageQueue中取Message 最后如果取出的Message不为null 则调用msg.target.dispatchMessage分发消息（详见9）即 7、8、9便是Message的“出队”和分发</strong></p>
+<pre><code>public static void loop() {
+final Looper me = myLooper(); //详见7
+if (me == null) {
+throw new RuntimeException(&quot;No Looper; Looper.prepare() wasn&#39;t called on this thread.&quot;);
+}
+final MessageQueue queue = me.mQueue;
+
+for (;;) {
+Message msg = queue.next(); // might block 详见8
+if (msg == null) {
+// No message indicates that the message queue is quitting.
+return;
+}
+//...
+
+try {
+msg.target.dispatchMessage(msg); //详见9
+end = (slowDispatchThresholdMs == 0) ? 0 : SystemClock.uptimeMillis();
+} finally {
+if (traceTag != 0) {
+Trace.traceEnd(traceTag);
+}
+}
+//...
+
+msg.recycleUnchecked();//message回收
+}
+}
+</code></pre><p><strong>7.loop方法调用的myLooper来获得一个looper对象 关于此处如何得到的looper对象 后面在Looper类解析时会详细讲</strong></p>
+<pre><code>public static @Nullable Looper myLooper() {
+return sThreadLocal.get();
+}</code></pre><p>*<em>8.拿到looper之后就调用MessageQueue的next方法 该方法同样是一个死循环 会不断的从MessageQueue中取Message然后返回 *</em></p>
+<pre><code>Message next() {
+//...
+for (;;) {
+
+synchronized (this) {
+// Try to retrieve the next message.  Return if found.
+final long now = SystemClock.uptimeMillis();
+Message prevMsg = null;
+Message msg = mMessages;
+if (msg != null &amp;&amp; msg.target == null) {//一般通过obtain拿到的message其target均不为空,所以该处判断不成立
+// Stalled by a barrier.  Find the next asynchronous message in the queue.
+do {
+prevMsg = msg;
+msg = msg.next;
+} while (msg != null &amp;&amp; !msg.isAsynchronous());
+}
+if (msg != null) {//执行此处逻辑
+if (now &lt; msg.when) {//now&lt;msg.when表示msg的触发时间还未到
+// Next message is not ready.  Set a timeout to wake up when it is ready.
+nextPollTimeoutMillis = (int) Math.min(msg.when - now, Integer.MAX_VALUE);
+} else {
+// Got a message.
+mBlocked = false;
+if (prevMsg != null) {
+prevMsg.next = msg.next;
+} else {
+mMessages = msg.next;//取下一条msg
+}
+msg.next = null;//把该message从queue移除
+if (DEBUG) Log.v(TAG, &quot;Returning message: &quot; + msg);
+msg.markInUse();
+return msg;
+}
+} else {
+// No more messages.
+nextPollTimeoutMillis = -1;
+}
+
+}
+
+}
+}</code></pre><p>*<em>9.获取到Message后进行消息分发。因为Message中有个target属性 它是一个handler对象 所以msg.target.dispatchMessage实际是调用handler中的dispatchMessage方法。 在dispatchMessage方法中 首先会判断该Message和handler的callback是否为空 如果两者都为空 才会执行重写的handleMessage方法 还记得handler可以使用post方式发送消息吗 使用post方式会传入一个Runnable对象 这个对象会赋值给Message的callback（callback是在Message中定义的一个Runnable对象）至此我们就可以在==handler所在线程==对收到的消息进行处理 *</em></p>
+<pre><code>public void dispatchMessage(Message msg) {
+if (msg.callback != null) {
+handleCallback(msg);//如果message的callback 不为空优先执行
+} else {
+if (mCallback != null) {
+if (mCallback.handleMessage(msg)) {//如果handler的callback不为空 执行
+return;
+}
+}
+handleMessage(msg); //优先级最低 只有前面两个callback为空时才会执行到这里
+}
+}</code></pre><p>以上是使用Handler发送、Message入队、出队以及Message分发的整个运行过程。其中Handler负责消息的发送以及最终的处理，Message是消息的载体，MessageQueue完成消息进行入队和出队，Looper则通过轮询让整个过程运转起来完成消息传递的功能。下面贴一张Handler机制运行图</p>
+<p><img src="http://gityuan.com/images/handler/handler_java.jpg" srcset="/img/loading.gif" alt="一张图"></p>
+<p><a href="http://gityuan.com/2015/12/26/handler-message-framework/" target="_blank" rel="noopener">图片来源：Android消息机制1-Handler(Java层)</a></p>
+<h3 id="三、相关问题汇总："><a href="#三、相关问题汇总：" class="headerlink" title="三、相关问题汇总："></a>三、相关问题汇总：</h3><p>1、如何正确使用Handler方法避免内存泄漏</p>
+<p>文章一开始我贴了一段我们一般使用Handler的代码，当时提示了那种使用方式是存在内存泄漏的风险的。那么什么情况会发生内存泄漏呢？我们都知道Handler可以通过post方法发送延迟执行的消息，而文首的使用方式Handler是持有Activity的引用的，如果在延迟消息执行前Activity销毁了，那么就会导致Activity的泄漏。解决方法就是可以使用静态内部类、弱应用、Activity销毁时及时清除消息。</p>
+<pre><code>public class MainActivity extends AppCompatActivity {
+
+private RHandler mHandler = new RHandler(this);
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+}
+
+static class RHandler extends Handler {
+private WeakReference&lt;Activity&gt; mReference; //弱引用持有activity
+
+RHandler(Activity reference) {
+mReference = new WeakReference&lt;&gt;(reference);
+}
+
+@Override
+public void handleMessage(Message msg) {
+//在这里拿到activty的引用 然后可以调用activity的相关方法
+MainActivity activity = (MainActivity) mReference.get();
+//dosmoething
+}
+}
+
+@Override
+protected void onDestroy() {
+mHandler.removeCallbacksAndMessages(null);//activity销毁及时清除消息
+super.onDestroy();
+}
+}</code></pre><p><strong>2、Message触发时间为什么采用SystemClock.uptimeMillis()而不使用 System.currentTimeMillis()获得的时间</strong></p>
+<p>搞清这个问题首先需要了解这两种获取时间的方式的差异。SystemClock.uptimeMillis()获取的是从开机到现在时刻的毫秒数 。System.currentTimeMillis()获取的是UTC时间的毫秒数。</p>
+<p>Message触发时间采用uptimeMillis()的原因是用户可以手动修改时间，如果采用currentTimeMillis()那Message的触发会变得非常混乱。</p>
+<p>了解了Hanlder整个运行流程之后我们再来详细的解析下每个类       未完待续…</p>
+
+            <hr>
+          </div>
+          <br>
+          <div>
+            <div id="post-tag">
+              
+              <span>
+                <i class="iconfont icon-tag"></i>
+                
+                  <a class="hover-with-bg" href="/tags/Handler">Handler</a>
+                
+              </span>
+            </div>
+            
+              <div id="post-note">
+                <div><strong>本文作者：</strong><a href="/">myname</a></div>
+                <div><strong>本文链接：</strong><a href="http://yoursite.com/2019/07/29/Handler/">http://yoursite.com/2019/07/29/Handler/</a></div>
+                <div><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</div>
+              </div>
+            
+            
+              <div id="post-nav" class="container">
+                  <div class="row">
+                    
+                      <a href="/2019/08/11/Handler(%E4%BA%8C)/" id="post-nav-prev" class="col">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="post-nav-title">Handler三部曲(二)</span>
+                      </a>
+                    
+                    
+                      <a href="/2019/07/29/hello-world/" id="post-nav-next" class="col">
+                        <span class="post-nav-title">Hello World</span>
+                        <i class="fas fa-arrow-right"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+            
+          </div>
+        </div>
+
+        <!-- custom -->
+        
+
+        <!-- Comments -->
+        <div class="col-lg-10 mx-auto nopadding-md">
+          <div class="container comments mx-auto" id="comments">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;ディレクトリ</p>
+    <div id="tocbot"></div>
+  </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+  </main>
+  
+<div id="sidebar" class="sidebar-hide">
+  <span class="sidebar-button sidebar-button-shift" id="toggle-sidebar" >
+    <i class="fa fa-arrow-right on" aria-hidden="true"></i>
+  </span>
+  <div class="sidebar-overlay"></div>
+  <div class="sidebar-intrude">
+    <div class="sidebar-avatar">
+      <img src="/img/favicon.png" srcset="/img/favicon.png" alt="avatar"/>
+    </div>
+    <div class="text-center sidebar-about">
+      <p class="h3 sidebar-author">Robin</p>
+      <p class="sidebar-subtitle"></p>
+      
+        <a href="https://github.com" class="h4" target="_blank">
+          <i class="fab fa-github" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="https://twitter.com" class="h4" target="_blank">
+          <i class="fab fa-twitter" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+        <a href="mailto:example@example.com" class="h4" target="_blank">
+          <i class="fas fa-envelope" aria-hidden="true"></i>
+        </a>
+        &nbsp;&nbsp;
+      
+    </div>
+    <div class="sidebar-friend">
+      <p class="h6 sidebar-friend-title">
+        <span class="sidebar-label-left"><i class="fas fa-user-friends"></i></span>
+        <span class="sidebar-label">友情链接</span>
+      </p>
+      <ul class="list-group">
+        
+          <a href="https://example.com/" target="_blank">
+            <li class="list-group-item">
+              <i class="fas fa-quote-left"></i>&nbsp;
+              friendname
+            </li>
+          </a>
+        
+    </ul>
+    </div>
+  </div>
+</div>
+
+
+  
+    <a class="z-depth-1" id="scroll-top-button" href="#" role="button">
+      <i class="fa fa-chevron-up scroll-top-arrow" aria-hidden="true"></i>
+    </a>
+  
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">検索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">キーワード</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <div id="footerContent"  class="rgba-black-slight">
+<footer class="pt-5">
+  <div class="text-center py-3">
+  
+
+    
+      <div class="footer-copyright">
+        
+          ©2020&nbsp;robin
+        
+        
+          
+            <i class="iconfont icon-love"></i>
+          
+          <span>运转了<span id="runtime"></span>天</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+    
+  </div>
+</footer>
+</div>
+<!-- SCRIPTS -->
+<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js" ></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
+<script src="https://cdn.staticfile.org/mdbootstrap/4.8.9/js/mdb.min.js" ></script>
+<script src="/js/main.js" ></script>
+
+  <script src="/js/lazyload.js" ></script>
+
+
+  
+    <script src="https://cdn.staticfile.org/tocbot/4.8.0/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
+<!-- Plugins -->
+
+  <script src="https://cdn.staticfile.org/prettify/r298/prettify.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('pre').addClass('prettyprint  linenums');
+      prettyPrint();
+    })
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/typed.js/2.0.10/typed.min.js" ></script>
+  <script type="text/javascript">
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Handler三部曲(一)&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/anchor-js/4.2.0/anchor.min.js" ></script>
+  <script type="text/javascript">
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+  <script src="/js/local-search.js" ></script>
+  <script type="text/javascript">
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      getSearchFile(path);
+      this.onclick = null
+    }
+  </script>
+
+
+  <script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <script type="text/javascript">
+  /* Fancybox */
+  var setupFancybox = function () {
+    $("#post img:not(.no-zoom img, img[no-zoom])").each(function() {
+    var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      $(this).wrap(element);
+    });
+  };
+  setupFancybox();
+  </script>
+
+
+
+
+  <!-- 首页文章列表随机图片 -->
+  <script type="text/javascript">
+    $("img.image_random").each(function(){
+      
+        var xjhUrl = "//img.xjh.me/random_img.php?return=json";
+      
+      var _this = $(this);
+      $.get(xjhUrl,function(data,status){
+        if(status === "success"){
+          if(data.result === 200){
+            _this[0].src = data.img;
+          }
+        }
+      });
+    });
+  </script>
+
+
+
+
+  <script async src="//cdn.jsdelivr.net/npm/busuanzi@2.3.0/bsz.pure.mini.js" ></script>
+  
+
+
+  
+  
+    <script type="text/javascript">
+      //定义获取词语下标
+      var a_idx = 0;
+      jQuery(document).ready(function ($) {
+        //点击body时触发事件
+        $("body").click(function (e) {
+          //需要显示的词语
+          var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正", "法治", "爱国", "敬业", "诚信", "友善");
+          //设置词语给span标签
+          var $i = $("<span/>").text(a[a_idx]);
+          //下标等于原来下标+1  余 词语总数
+          a_idx = (a_idx + 1) % a.length;
+          //获取鼠标指针的位置，分别相对于文档的左和右边缘。
+          //获取x和y的指针坐标
+          var x = e.pageX, y = e.pageY;
+          //在鼠标的指针的位置给$i定义的span标签添加css样式
+          $i.css({
+            "z-index": 999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": rand_color()
+          });
+          // 随机颜色
+          function rand_color() {
+            return "rgb(" + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + "," + ~~(255 * Math.random()) + ")"
+          }
+          //在body添加这个标签
+          $("body").append($i);
+          //animate() 方法执行 CSS 属性集的自定义动画。
+          //该方法通过CSS样式将元素从一个状态改变为另一个状态。CSS属性值是逐渐改变的，这样就可以创建动画效果。
+          //详情请看http://www.w3school.com.cn/jquery/effect_animate.asp
+          $i.animate({
+            //将原来的位置向上移动180
+            "top": y - 180,
+            "opacity": 0
+            //1500动画的速度
+          }, 1500, function () {
+            //时间到了自动删除
+            $i.remove();
+          });
+        });
+      })
+      ;
+    </script>
+  
+
+
+<!-- Functions -->
+<script type="text/javascript">
+  /* 切换背景 */
+  
+    $("body").removeClass("banner-bg");
+    $("#background").addClass("banner-bg");
+    $('#mainContent').removeClass("rgba-black-slight");
+    $('#footerContent').removeClass("rgba-black-slight");
+    if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) || (/Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent))) {
+      $("#background").css("background-attachment", "scroll");
+    }
+  
+</script>
+
+  <script type="text/javascript">
+    /*显示博客运行时间*/
+    var blogRunTime = function () {
+      var runTime = document.getElementById("runtime");
+      var runtimeDate = "2019,04,20";
+	    var createDate = new Date(runtimeDate);
+	    var nowDate = new Date();
+	    var dateLine = nowDate.getTime() - createDate.getTime();
+	    var runDate = Math.floor(dateLine / (1000 * 60 * 60 * 24));
+	    runTime.innerHTML = runDate;
+    };
+    $(document).ready(function(){
+	    blogRunTime();
+    });
+  </script>
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+  
+</body>
+</html>
